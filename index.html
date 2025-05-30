@@ -1,53 +1,61 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Orçamento - Vinicius Barbato Films</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Orçamento Vinicius Barbaro Films</title>
   <style>
     body {
       margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: #fdfdfd url('https://www.transparenttextures.com/patterns/marble.png');
-      color: #1f2c3f;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #fdfdfd url('https://www.transparenttextures.com/patterns/white-marble.png');
+      color: #2b2b2b;
     }
     header {
-      background-color: #1a2b44;
+      background-color: #0f3d57;
       color: white;
       padding: 1rem;
       text-align: center;
+      font-size: 1.8rem;
+      font-weight: bold;
     }
-    main {
-      max-width: 800px;
+    section {
+      max-width: 700px;
       margin: 2rem auto;
       background: white;
       padding: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     }
-    h1, h2 {
-      color: #1a2b44;
+    h2 {
+      color: #0f3d57;
+      font-size: 1.4rem;
+      margin-bottom: 1rem;
     }
     label {
       display: block;
-      margin-top: 1rem;
-      font-weight: bold;
+      margin: 0.5rem 0 0.2rem;
+      font-weight: 500;
     }
-    input, select, button, textarea {
+    select, input[type="number"] {
       width: 100%;
-      padding: 0.6rem;
-      margin-top: 0.4rem;
+      padding: 0.5rem;
+      margin-bottom: 1rem;
       border: 1px solid #ccc;
       border-radius: 6px;
-      font-size: 1rem;
     }
     button {
-      background-color: #1a2b44;
+      background: #0f3d57;
       color: white;
-      font-weight: bold;
       border: none;
-      margin-top: 1.5rem;
+      padding: 0.8rem 1.5rem;
+      font-size: 1rem;
+      border-radius: 8px;
       cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #0d2e41;
     }
     .step {
       display: none;
@@ -55,128 +63,88 @@
     .step.active {
       display: block;
     }
-    #map {
-      width: 100%;
-      height: 300px;
-      margin-top: 1rem;
+    .footer {
+      text-align: center;
+      font-size: 0.8rem;
+      margin-top: 3rem;
+      color: #888;
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>Solicite seu Orçamento</h1>
+    Vinicius Barbaro Films – Solicitação de Orçamento
   </header>
-  <main>
-    <form id="formularioOrcamento">
-      <div class="step active" id="step1">
-        <h2>1. Cobertura do Dia</h2>
-        <label>Quantidade de Fotógrafos</label>
-        <select id="qtdFotografos">
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-        </select>
+  <section id="step1" class="step active">
+    <h2>Passo 1: Cobertura do Dia</h2>
+    <label for="cobertura-select">Duração da Cobertura:</label>
+    <select id="cobertura-select"></select>
 
-        <label>Quantidade de Cinegrafistas</label>
-        <select id="qtdCinegrafistas">
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-        </select>
+    <label for="fotografos">Quantidade de Fotógrafos:</label>
+    <input type="number" id="fotografos" min="0" max="7" value="1" />
 
-        <label>Storymakers</label>
-        <select id="qtdStorymakers">
-          <option value="0">0</option>
-          <option value="1">1</option>
-          <option value="2">2</option>
-        </select>
+    <label for="cinegrafistas">Quantidade de Cinegrafistas:</label>
+    <input type="number" id="cinegrafistas" min="0" max="7" value="1" />
 
-        <label>Duração da Cobertura</label>
-        <select id="duracaoCobertura">
-          <option value="4">4 horas</option>
-          <option value="6">6 horas</option>
-          <option value="8">8 horas</option>
-          <option value="10">10 horas</option>
-          <option value="12">12 horas</option>
-          <option value="14">14 horas</option>
-          <option value="15">15h ou mais (personalizado)</option>
-        </select>
+    <label for="storymakers">Quantidade de Storymakers (máx. 2):</label>
+    <input type="number" id="storymakers" min="0" max="2" value="0" />
 
-        <button type="button" onclick="proximaEtapa(2)">Continuar</button>
-      </div>
+    <button onclick="nextStep()">Continuar</button>
+  </section>
 
-      <div class="step" id="step2">
-        <h2>2. Estilos de Vídeo</h2>
-        <p>Selecione ao menos um (caso tenha contratado filmagem)</p>
-        <label><input type="checkbox" name="estilosVideo" value="Teaser Geral"> Teaser Geral</label>
-        <label><input type="checkbox" name="estilosVideo" value="Short Film"> Short Film (7min)</label>
-        <label><input type="checkbox" name="estilosVideo" value="Long Film"> Long Film (30min)</label>
-        <label><input type="checkbox" name="estilosVideo" value="Cerimonial"> Cerimonial Completo</label>
-        <button type="button" onclick="proximaEtapa(3)">Próximo</button>
-      </div>
+  <section id="step2" class="step">
+    <h2>Passo 2: Estilos de Vídeo</h2>
+    <form id="video-estilos-form"></form>
+    <button onclick="nextStep()">Continuar</button>
+  </section>
 
-      <div class="step" id="step3">
-        <h2>3. Adicionais de Filmagem</h2>
-        <label><input type="checkbox" name="adicionalVideo" value="Drone"> Imagens com Drone</label>
-        <label><input type="checkbox" name="adicionalVideo" value="Vídeo Extra"> Vídeo Extra</label>
-        <button type="button" onclick="proximaEtapa(4)">Próximo</button>
-      </div>
+  <div class="footer">© 2025 Vinicius Barbaro Films</div>
 
-      <div class="step" id="step4">
-        <h2>4. Local do Evento</h2>
-        <div id="map"></div>
-        <button type="button" onclick="proximaEtapa(5)">Próximo</button>
-      </div>
-
-      <div class="step" id="step5">
-        <h2>5. Pré-Wedding</h2>
-        <label><input type="checkbox" id="querPreWedding"> Desejo fazer pré-wedding</label>
-        <label>Duração:</label>
-        <select id="tempoPreWedding">
-          <option value="2">Até 2h</option>
-          <option value="4">Até 4h</option>
-        </select>
-        <button type="button" onclick="proximaEtapa(6)">Próximo</button>
-      </div>
-
-      <div class="step" id="step6">
-        <h2>6. Local do Pré-Wedding</h2>
-        <div id="mapPreWedding"></div>
-        <button type="button" onclick="proximaEtapa(7)">Ver Orçamento</button>
-      </div>
-
-      <div class="step" id="step7">
-        <h2>7. Valor Final e Contato</h2>
-        <p id="resumoOrcamento">Carregando resumo...</p>
-        <a id="botaoWhatsApp" href="#" target="_blank">
-          <button type="button">Solicitar pelo WhatsApp</button>
-        </a>
-      </div>
-    </form>
-  </main>
-
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDkUBDgCyX6btyclRv2Gw41PR111VVzlOQ&callback=initMap&libraries=places" async defer></script>
   <script>
-    let etapaAtual = 1;
-    function proximaEtapa(n) {
-      document.querySelector(`#step${etapaAtual}`).classList.remove('active');
-      etapaAtual = n;
-      document.querySelector(`#step${etapaAtual}`).classList.add('active');
+    let currentStep = 1;
+    const stepCount = 2;
+
+    function nextStep() {
+      if (currentStep < stepCount) {
+        document.getElementById(`step${currentStep}`).classList.remove('active');
+        currentStep++;
+        document.getElementById(`step${currentStep}`).classList.add('active');
+      }
     }
 
-    function initMap() {
-      const map = new google.maps.Map(document.getElementById("map"), {
-        center: { lat: -23.5006, lng: -46.4536 },
-        zoom: 10,
-      });
-      const marker = new google.maps.Marker({ position: map.getCenter(), map: map });
+    async function loadPlanilhaDados() {
+      const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSU-fqjBfA2H6XvQl7iQj04dVs3ZcpLBpfe1oDshpchCKwM5xA2YDnDo3aErtDjH0C3rq0FjxljUkjo/pub?output=csv";
+      const response = await fetch(url);
+      const data = await response.text();
+      const rows = data.split("\n").map(r => r.split(","));
 
-      const map2 = new google.maps.Map(document.getElementById("mapPreWedding"), {
-        center: { lat: -23.5006, lng: -46.4536 },
-        zoom: 10,
-      });
-      const marker2 = new google.maps.Marker({ position: map2.getCenter(), map: map2 });
+      // Preencher coberturas a partir da primeira linha (linha 0), ignorando a primeira coluna (índice 0)
+      const primeiraLinha = rows[0];
+      const coberturaSelect = document.getElementById("cobertura-select");
+      for (let i = 1; i < primeiraLinha.length; i++) {
+        const opcao = document.createElement("option");
+        opcao.value = primeiraLinha[i];
+        opcao.textContent = primeiraLinha[i];
+        coberturaSelect.appendChild(opcao);
+      }
+
+      // Preencher estilos de vídeo
+      const estiloInicio = rows.findIndex(r => r[0] === "estilos de video do dia") + 1;
+      const estiloForm = document.getElementById("video-estilos-form");
+      for (let i = estiloInicio; i < rows.length; i++) {
+        if (!rows[i][0]) break;
+        const label = document.createElement("label");
+        const input = document.createElement("input");
+        input.type = "checkbox";
+        input.name = "video_estilo";
+        input.value = rows[i][0];
+        label.appendChild(input);
+        label.append(" " + rows[i][0]);
+        estiloForm.appendChild(label);
+      }
     }
+
+    window.onload = loadPlanilhaDados;
   </script>
 </body>
 </html>
