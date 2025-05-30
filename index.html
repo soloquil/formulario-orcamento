@@ -71,6 +71,19 @@
       </div>
       <div class="nav">
         <button onclick="goStep(2)">Voltar</button>
+        <button onclick="goStep(4)">Próximo</button>
+      </div>
+    </div>
+
+    <!-- Step 4 -->
+    <div id="step4" class="step">
+      <h3>4. Extras</h3>
+      <div class="checkbox-group">
+        <label><input type="checkbox" id="extra-cabine" value="Cabine de fotos"> Cabine de fotos</label>
+        <label><input type="checkbox" id="extra-instax" value="Instax ilimitada"> Instax ilimitada</label>
+      </div>
+      <div class="nav">
+        <button onclick="goStep(3)">Voltar</button>
         <button onclick="sendWhats()">Enviar WhatsApp</button>
       </div>
     </div>
@@ -117,12 +130,16 @@
       const pre = [];
       if(document.getElementById('pre-photo').checked) pre.push('Pré-wedding foto');
       if(document.getElementById('pre-video').checked) pre.push('Pré-wedding vídeo');
+      const extras = [];
+      if(document.getElementById('extra-cabine').checked) extras.push('Cabine de fotos');
+      if(document.getElementById('extra-instax').checked) extras.push('Instax ilimitada');
 
       let msg = 'Olá! gostaria de falar sobre este orçamento:';
       msg += '\nServiços do dia: ' + (services.length? services.join(', ') : 'Nenhum');
       if(videoOpts.length) msg += '\nTipos de Vídeo: ' + videoOpts.join(', ');
       msg += '\nAdicionais: ' + (additionals.length? additionals.join(', ') : 'Nenhum');
       msg += '\nPré-Wedding: ' + (pre.length? pre.join(', ') : 'Nenhum');
+      msg += '\nExtras: ' + (extras.length? extras.join(', ') : 'Nenhum');
 
       const url = 'https://wa.me/5511978894210?text=' + encodeURIComponent(msg);
       window.open(url, '_blank');
