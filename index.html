@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Orçamento Filmagem e Foto</title>
+<style>
+  body { font-family: Arial, sans-serif; max-width: 600px; margin: 20px auto; padding: 10px; }
+  label { display: block; margin-top: 10px; }
+  input, select { width: 100%; padding: 8px; margin-top: 4px; }
+  button { margin-top: 20px; padding: 10px; width: 100%; background: #007bff; color: white; border: none; cursor: pointer; font-size: 16px; }
+  button:hover { background: #0056b3; }
+  #resultado { margin-top: 20px; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<h2>Solicite seu Orçamento</h2>
+
+<form id="formOrcamento">
+  
+  <label for="endereco">Endereço do Evento:</label>
+  <input type="text" id="endereco" placeholder="Rua, número, cidade, estado" required />
+  
+  <label for="duracao">Duração da Cobertura:</label>
+  <select id="duracao" required>
+    <option value="">Selecione</option>
+    <option value="7">7 horas</option>
+    <option value="8">8 horas</option>
+    <option value="9">9 horas</option>
+  </select>
+  
+  <label>Serviços:</label>
+  <label><input type="checkbox" class="servico" value="filmagem" /> Filmagem</label>
+  <label><input type="checkbox" class="servico" value="fotografia" /> Fotografia</label>
+  <label><input type="checkbox" class="servico" value="drone" /> Drone</label>
+  
+  <div id="resultado">Total: R$ 0,00</div>
+  
+  <button type="button" id="btnWhats">Enviar Orçamento via WhatsApp</button>
+</form>
+
+<script>
+// Configurações de preços por serviço e duração (7h, 8h, 9h)
+const precos = {
+  filmagem: {7: 1500, 8: 1700, 9: 1900},
+  fotografia: {7: 1300, 8: 1500, 9: 1700},
+  drone: {7: 500, 8: 600, 9: 700}
+};
+
+// Endereço base para cálculo de distância (exemplo)
+const enderecoBase = "Av. Paulista, São Paulo, SP";
+
+// Valor por km acima de 40km
+const valorKmAdicional = 2; // R$ 2 por km excedente
+const kmIsento = 40;
+
+// Função para calcular distância entre dois endereços via Google Maps Distance Matrix API
+// Para isso, você precisará inserir sua chave da API e ativar o serviço no Google Cloud
+const apiKey = "SUA_CHAVE_API_GOOGLE_MAPS_AQUI";
+
+async function calcularDistancia(origem, destino) {
+  const url = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${encodeURIComponent(origem)}&destinations=${encodeURIComponent(destino)}&key=${apiKey}&units=metric&language=pt-BR`;
+  try {
+    const resposta = await fetch(url);
+    const dados = await resposta.json();
+    if(dados.status === "OK" && dados.rows[0].elements[0].status === "OK") {
+      return dados.rows[0].elements[0].distance.value / 1000; // distância em km
+    } else {
+      alert("Erro ao calcular distância. Verifique os endereços.");
+      return null;
+    }
+  } catch(e) {
+    alert("Erro na conexão com o Google Maps.");
+    return null;
+  }
+}
+
+const form = document.getElementById("formOrcamento");
+const resultado = document.getElementById("resultado");
+const btnWhats = document.getElementById("btnWhats");
+
+let distanciaCalculada = null;
+
+async function calcularTotal() {
+  const duracao = form.duracao.value;
+  const enderecoEvento = form.endereco.value.trim();
+  const servicosSelecionados = [...form.querySelectorAll(".servico:checked")].map(el => el.value);
+
+  if (!duracao || servicosSelecionados.length === 0 || !enderecoEvento) {
+    resultado.textContent = "Total: R$ 0,00";
+    return;
+  }
+
+  // Calcular distância se ainda não calculada ou endereço mudou
+  if (!distanciaCalculada || form.endereco.value !== enderecoEvento) {
+    distanciaCalculada = await calcularDistancia(enderecoBase, enderecoEvento);
+  }
+
+  if (distanciaCalculada === null) {
+    resultado.textContent = "Erro no cálculo da distância.";
+    return;
+  }
+
+  // Calcular valor adicional por distância
+  let adicionalDistancia = 0;
+  if (distanciaCalculada > kmIsento) {
+    adicionalDistancia = (distanciaCalculada - kmIsento) * valorKmAdicional;
+  }
+
+  // Calcular total dos serviços conforme duração
+  let total = 0;
+  servicosSelecionados.forEach(servico => {
+    total += precos[servico][duracao];
+  });
+
+  total += adicionalDistancia;
+
+  resultado.textContent = `Total: R$ ${total.toFixed(2).replace(".", ",")} (Distância: ${distanciaCalculada.toFixed(1)} km)`;
+  return total;
+}
+
+// Atualiza total ao mudar seleções
+form.addEventListener("change", () => {
+  distanciaCalculada = null; // força recalculo
+  calcularTotal();
+});
+
+btnWhats.addEventListener("click", async () => {
+  const duracao = form.duracao.value;
+  const enderecoEvento = form.endereco.value.trim();
+  const servicosSelecionados = [...form.querySelectorAll(".servico:checked")].map(el => el.value);
+
+  if (!duracao || servicosSelecionados.length === 0 || !enderecoEvento) {
+    alert("Por favor, preencha todos os campos e selecione ao menos um serviço.");
+    return;
+  }
+
+  const total = await calcularTotal();
+
+  if (total === null) return;
+
+  const servicosTexto = servicosSelecionados.map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(", ");
+
+  const mensagem = `Olá! Gostaria de um orçamento para:\n- Serviços: ${servicosTexto}\n- Duração: ${duracao} horas\n- Endereço do evento: ${enderecoEvento}\n- Distância calculada: ${distanciaCalculada.toFixed(1)} km\n- Valor total: R$ ${total.toFixed(2).replace(".", ",")}`;
+
+  const telefoneWhats = "55SEUNUMERODDD"; // Coloque seu número com DDD e sem espaços, ex: 5511999999999
+
+  const urlWhats = `https://api.whatsapp.com/send?phone=${telefoneWhats}&text=${encodeURIComponent(mensagem)}`;
+
+  window.open(urlWhats, "_blank");
+});
+</script>
+
+</body>
+</html>
