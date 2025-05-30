@@ -7,110 +7,128 @@
   <style>
     body { margin:0; font-family:'Segoe UI',sans-serif; background:#fdfdfd url('https://www.transparenttextures.com/patterns/white-marble.png'); color:#2b2b2b; }
     header { background:#0f3d57; color:#fff; padding:1rem; text-align:center; font-size:1.8rem; }
-    .step { display:none; max-width:700px; margin:2rem auto; background:#fff; padding:2rem; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.1);}    
+    .step { display:none; max-width:700px; margin:2rem auto; background:#fff; padding:2rem; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.1);}   
     .step.active { display:block; }
     h2 { color:#0f3d57; margin-bottom:1rem; }
     label { display:block; margin:0.5rem 0; font-weight:500; }
-    select,input { width:100%; padding:0.5rem; margin-bottom:1rem; border:1px solid #ccc; border-radius:6px; }
-    button { background:#0f3d57; color:#fff; border:none; padding:0.8rem 1.5rem; border-radius:8px; cursor:pointer; transition:0.3s; }
+    select,input { width:48%; padding:0.5rem; margin:0.5rem 1%; border:1px solid #ccc; border-radius:6px; }
+    button { background:#0f3d57; color:#fff; border:none; padding:0.8rem 1.5rem; border-radius:8px; cursor:pointer; transition:0.3s; margin:0.5rem; }
     button:hover { background:#0d2e41; }
+    .nav-buttons { text-align:right; }
     .footer { text-align:center; font-size:0.8rem; color:#888; margin:2rem 0; }
   </style>
 </head>
 <body>
   <header>Vinicius Barbaro Films – Orçamento</header>
 
-  <!-- Step 1: Cobertura -->
+  <!-- Generic function and state -->
+  <script>
+    let currentStep = 1;
+    const totalSteps = 7;
+    const selections = {};
+    function showStep(n) {
+      for (let i=1;i<=totalSteps;i++) document.getElementById('step'+i).classList.remove('active');
+      document.getElementById('step'+n).classList.add('active');
+      currentStep = n;
+    }
+    function prev() { if(currentStep>1) showStep(currentStep-1);}    
+    function next() { if(currentStep<totalSteps) showStep(currentStep+1);}    
+    // Read CSV once
+    let rows;
+    async function loadSheet() {
+      const res = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vSU-fqjBfA2H6XvQl7iQj04dVs3ZcpLBpfe1oDshpchCKwM5xA2YDnDo3aErtDjH0C3rq0FjxljUkjo/pub?output=csv');
+      const txt = await res.text();
+      rows = txt.split('\n').map(r=>r.split(','));
+      initSteps();
+    }
+    function findTag(tag) { return rows.findIndex(r=>r[0]===tag); }
+    function sliceSection(startTag, endTag) {
+      const s = findTag(startTag);
+      const e = findTag(endTag);
+      if(s>=0 && e> s) return rows.slice(s+1,e);
+      return [];
+    }
+    function initSteps() {
+      // Step1: Map event location
+      initMap('map-evento');
+      // Step2: Pre-wedding choice
+      const preOpts = sliceSection('pré-wedding-opções-inicial','pré-wedding-opções-final');
+      const container2 = document.getElementById('prewedding-service');
+      preOpts.forEach(r=>{ const lbl=document.createElement('label'); const cb=document.createElement('input'); cb.type='checkbox'; cb.value=r[0]; lbl.appendChild(cb); lbl.append(' '+r[0]); container2.appendChild(lbl); });
+      // Step3: Duration coverage
+      const durOpts = sliceSection('duração-de-cobertura-inicial','duração-de-cobertura-final')[0] || [];
+      const sc=document.getElementById('coverage-duration'); for(let i=1;i<durOpts.length;i++){ if(durOpts[i]) sc.append(new Option(durOpts[i],durOpts[i])); }
+      // Step4: start time
+      // no dynamic options
+      // Step5: video services
+      const servOpts = sliceSection('serviço-de-cobertura-inicial','serviço-de-cobertura-final');
+      const ct = document.getElementById('coverage-services'); servOpts.forEach(r=>{ const lbl=document.createElement('label'); const cb=document.createElement('input'); cb.type='checkbox'; cb.value=r[0]; lbl.appendChild(cb); lbl.append(' '+r[0]); ct.appendChild(lbl); });
+      // Step6: video styles
+      const vidOpts = sliceSection('estilos-de-video-inicial','estilos-de-video-final');
+      const vs = document.getElementById('video-styles'); vidOpts.forEach(r=>{ const lbl=document.createElement('label'); const cb=document.createElement('input'); cb.type='checkbox'; cb.value=r[0]; lbl.appendChild(cb); lbl.append(' '+r[0]); vs.appendChild(lbl); });
+      // Step7: summary - nothing to init
+    }
+    function initMap(id) {
+      // Placeholder: integrate maps here
+      document.getElementById(id).style.background='#ddd';
+    }
+    window.onload = loadSheet;
+  </script>
+
+  <!-- Step 1: Event Location -->
   <div id="step1" class="step active">
-    <h2>1. Cobertura do Dia</h2>
-    <label>Duração da Cobertura</label>
-    <select id="cobertura-select"></select>
-    <label>Fotógrafos (quant.)</label>
-    <input type="number" id="fotografos" min="0" />
-    <label>Cinegrafistas (quant.)</label>
-    <input type="number" id="cinegrafistas" min="0" />
-    <label>Storymakers (max 2)</label>
-    <input type="number" id="storymakers" min="0" max="2" />
-    <button onclick="nextStep()">Avançar</button>
+    <h2>1. Local do Evento</h2>
+    <div id="map-evento" style="width:100%;height:300px;"></div>
+    <div class="nav-buttons"><button onclick="next()">Continuar</button></div>
   </div>
 
-  <!-- Step 2: Estilos de Vídeo -->
+  <!-- Step 2: Pre Wedding -->
   <div id="step2" class="step">
-    <h2>2. Estilos de Vídeo</h2>
-    <div id="video-estilos"></div>
-    <button onclick="nextStep()">Avançar</button>
+    <h2>2. Pré-Wedding</h2>
+    <div id="prewedding-service"></div>
+    <div class="nav-buttons">
+      <button onclick="prev()">Voltar</button>
+      <button onclick="next()">Continuar</button>
+    </div>
   </div>
 
-  <!-- Step 3: Adicionais de Filmagem -->
+  <!-- Step 3: Coverage Duration & Start -->
   <div id="step3" class="step">
-    <h2>3. Adicionais de Filmagem</h2>
-    <div id="adicionais-video"></div>
-    <button onclick="nextStep()">Avançar</button>
+    <h2>3. Duração da Cobertura</h2>
+    <select id="coverage-duration"></select>
+    <label>Horário de Início:</label><input type="time" id="start-time" />
+    <div class="nav-buttons"><button onclick="prev()">Voltar</button><button onclick="next()">Continuar</button></div>
   </div>
 
-  <!-- Step 4: Local do Evento -->
+  <!-- Step 4: Coverage Services -->
   <div id="step4" class="step">
-    <h2>4. Local do Evento</h2>
-    <div id="map-evento" style="width:100%;height:300px; background:#eee"></div>
-    <button onclick="nextStep()">Avançar</button>
+    <h2>4. Serviços de Cobertura</h2>
+    <div id="coverage-services"></div>
+    <div class="nav-buttons"><button onclick="prev()">Voltar</button><button onclick="next()">Continuar</button></div>
   </div>
 
-  <!-- Step 5: Serviços de Pré-Wedding -->
+  <!-- Step 5: Video Styles -->
   <div id="step5" class="step">
-    <h2>5. Pré-Wedding</h2>
-    <div id="prewedding-servicos"></div>
-    <button onclick="handlePreWed()" id="btn-pre">Avançar</button>
+    <h2>5. Estilos de Vídeo</h2>
+    <div id="video-styles"></div>
+    <div class="nav-buttons"><button onclick="prev()">Voltar</button><button onclick="next()">Continuar</button></div>
   </div>
 
-  <!-- Step 6: Local do Pré-Wedding -->
+  <!-- Step 6: Additional & PreWedding Location (combined) -->
   <div id="step6" class="step">
-    <h2>6. Local do Pré-Wedding</h2>
-    <div id="map-pre"></div>
-    <button onclick="nextStep()">Avançar</button>
+    <h2>6. Local e Adicionais</h2>
+    <div id="map-pre" style="width:100%;height:300px;"></div>
+    <div id="additional-services"></div>
+    <div class="nav-buttons"><button onclick="prev()">Voltar</button><button onclick="next()">Continuar</button></div>
   </div>
 
-  <!-- Step 7: Resumo e Envio -->
+  <!-- Step 7: Summary and Send -->
   <div id="step7" class="step">
     <h2>7. Resumo</h2>
     <pre id="resumo"></pre>
-    <button onclick="enviarWhats()">Enviar via WhatsApp</button>
+    <div class="nav-buttons"><button onclick="prev()">Voltar</button><button onclick="enviarWhats()">Enviar WhatsApp</button></div>
   </div>
 
   <div class="footer">© 2025 Vinicius Barbaro Films</div>
-
-  <script>
-    let step=1;
-    function nextStep(){ document.getElementById('step'+step).classList.remove('active'); step++; document.getElementById('step'+step).classList.add('active'); }
-    function handlePreWed(){ /* lógica para pular ou mostrar mapa */ nextStep(); }
-
-    async function loadDados(){
-      const resp = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vSU-fqjBfA2H6XvQl7iQj04dVs3ZcpLBpfe1oDshpchCKwM5xA2YDnDo3aErtDjH0C3rq0FjxljUkjo/pub?output=csv');
-      const txt = await resp.text();
-      const rows = txt.split('\n').map(r=>r.split(','));
-      const idx = tag=>rows.findIndex(r=>r[0]===tag);
-
-      // Step1: cobertura tags
-      const sc=idx('duração-de-cobertura-inicial'), ec=idx('duração-de-cobertura-final');
-      for(let i=sc+1;i<ec;i++){ rows[i].slice(1).forEach(opt=>{
-          if(opt) document.getElementById('cobertura-select').append(new Option(opt,opt)); }); }
-
-      // Step2: video estilos
-      const sv=idx('estilos-de-video-inicial'), ev=idx('estilos-de-video-final');
-      for(let i=sv+1;i<ev;i++){ let nm=rows[i][0]; if(nm) document.getElementById('video-estilos').innerHTML+=`<label><input type=checkbox value="${nm}"> ${nm}</label>`; }
-
-      // Step3: adicionais de filmagem
-      const sa=idx('adicionais-de-filmagem-inicial'), ea=idx('adicionais-de-filmagem-final');
-      for(let i=sa+1;i<ea;i++){ let nm=rows[i][0]; if(nm) document.getElementById('adicionais-video').innerHTML+=`<label><input type=checkbox value="${nm}"> ${nm}</label>`; }
-
-      // Step5: pre-wedding
-      const sp=idx('serviços-pré-wedding-inicial'), ep=idx('serviços-pré-wedding-final');
-      for(let i=sp+1;i<ep;i++){ let nm=rows[i][0]; if(nm) document.getElementById('prewedding-servicos').innerHTML+=`<label><input type=checkbox value="${nm}"> ${nm}</label>`; }
-
-      // Outros steps (deslocamento, etc) você deve definir tags semelhantes na planilha
-    }
-    window.onload=loadDados;
-
-    function enviarWhats(){ /* coletar dados, montar mensagem e abrir WhatsApp */ }
-  </script>
 </body>
 </html>
