@@ -43,7 +43,7 @@
         <label><input type="checkbox" value="video extended film (50m)"> video extended film (50m)</label>
       </div>
       <div class="nav">
-        <button onclick="goStep(2)">Próximo</button>
+        <button id="next1" onclick="goStep(2)" disabled>Próximo</button>
       </div>
     </div>
 
@@ -51,6 +51,7 @@
     <div id="step2" class="step">
       <h3>2. Adicionais de Vídeo</h3>
       <div class="checkbox-group">
+        <strong>Adicionais:</strong>
         <label><input type="checkbox" value="drone ambientação"> drone ambientação</label>
         <label><input type="checkbox" value="drone completo"> drone completo</label>
         <label><input type="checkbox" value="sameday edit"> sameday edit</label>
@@ -80,15 +81,30 @@
     function goStep(n) {
       document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
       document.getElementById('step'+n).classList.add('active');
-      if(n===1) toggleVideo();
+      if(n===1) checkNext1();
     }
 
     function toggleVideo() {
       const show = document.getElementById('service-video').checked;
       document.getElementById('video-options').style.display = show ? 'block' : 'none';
+      checkNext1();
     }
-
     document.getElementById('service-video').addEventListener('change', toggleVideo);
+    document.getElementById('service-photo').addEventListener('change', checkNext1);
+    document.getElementById('service-story').addEventListener('change', checkNext1);
+    document.querySelectorAll('#video-options input').forEach(i=>i.addEventListener('change', checkNext1));
+
+    function checkNext1() {
+      const photo = document.getElementById('service-photo').checked;
+      const story = document.getElementById('service-story').checked;
+      const video = document.getElementById('service-video').checked;
+      let enable = photo || story || video;
+      if(video) {
+        const anyVideo = Array.from(document.querySelectorAll('#video-options input:checked')).length > 0;
+        enable = enable && anyVideo;
+      }
+      document.getElementById('next1').disabled = !enable;
+    }
 
     function sendWhats() {
       const services = [];
@@ -108,7 +124,7 @@
       msg += '\nAdicionais: ' + (additionals.length? additionals.join(', ') : 'Nenhum');
       msg += '\nPré-Wedding: ' + (pre.length? pre.join(', ') : 'Nenhum');
 
-      const url = 'https://wa.me/5511972790860?text=' + encodeURIComponent(msg);
+      const url = 'https://wa.me/5511978894210?text=' + encodeURIComponent(msg);
       window.open(url, '_blank');
     }
   </script>
