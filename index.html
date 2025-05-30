@@ -17,6 +17,8 @@
     button:hover { background:#0d2e41; }
     .nav-buttons { text-align:right; }
     .footer { text-align:center; font-size:0.8rem; color:#888; margin:2rem 0; }
+    .btn-quick { display: inline-block; background: #eee; color: #333; padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.8rem; cursor: pointer; margin: 0.3rem 0.3rem 0.3rem 0; }
+    .btn-quick:hover { background: #ddd; }
   </style>
 </head>
 <body>
@@ -46,7 +48,21 @@
       // Step1: Map
       initMap('map-evento', address=>sel.address=address);
       document.getElementById('step1-btns').innerHTML=`<button onclick="nextStep()">Continuar</button>`;
-      
+      // Quick select buttons
+      const quicks = ['São Paulo - Zona Leste','São Paulo - Centro','São Paulo - Zona Sul','Guarulhos','Mogi das Cruzes'];
+      const quickDiv = document.createElement('div');
+      quicks.forEach(loc => {
+        const btn = document.createElement('span');
+        btn.className = 'btn-quick';
+        btn.textContent = loc;
+        btn.onclick = () => {
+          const input = document.querySelector('#map-evento input');
+          if(input){ input.value = loc; sel.address = loc; }
+        };
+        quickDiv.appendChild(btn);
+      });
+      document.getElementById('map-evento').appendChild(quickDiv);
+
       // Step2: Pre-wedding options
       const pre= sliceSection('serviços-de-pré-wedding-inicial','serviços-de-pré-wedding-final');
       const d2=document.getElementById('prewedding-services'); pre.forEach(r=>{ d2.insertAdjacentHTML('beforeend',`<label class="checkbox-group"><input type="checkbox" value="${r[0]}"> ${r[0]}</label>`); });
@@ -79,7 +95,6 @@
     function initMap(id,callback){
       const input=document.createElement('input'); input.placeholder='Busque o local';
       const div=document.getElementById(id); div.appendChild(input);
-      // Simplified: no real map, but capture address
       input.onchange=()=>callback(input.value);
     }
 
@@ -91,7 +106,7 @@
       let total=0;
       services.forEach(r=>{ const name=r[0]; const checked=document.querySelector(`#coverage-services input[value="${name}"]`).checked; if(checked){
         const price=parseFloat(r[idxOrc+1]||0);
-        const cnt= parseInt(document.getElementById(name.toLowerCase().includes('filmagem')?'cin  egrafistas':'fotografos').value)||1;
+        const cnt= parseInt(document.getElementById(name.toLowerCase().includes('filmagem')?'cinegrafistas':'fotografos').value)||1;
         const multRow = multip.find(m=>parseInt(m[0])===cnt);
         const mult = multRow?parseFloat(multRow[1]):1;
         total += price * mult;
@@ -104,21 +119,18 @@
       return 0;
     }
     async function enviarWhats(){
-      // collect selections
       sel.pre = Array.from(document.querySelectorAll('#prewedding-services input:checked')).map(i=>i.value);
       sel.duration = document.getElementById('coverage-duration').value;
       sel.startTime = document.getElementById('start-time').value;
       sel.services = Array.from(document.querySelectorAll('#coverage-services input:checked')).map(i=>i.value);
       sel.videoStyles = Array.from(document.querySelectorAll('#video-styles input:checked')).map(i=>i.value);
       sel.additional = Array.from(document.querySelectorAll('#additional-services input:checked')).map(i=>i.value);
-      // calc
       const covCost = getCoverageCost();
       const addCost = sel.additional.reduce((sum,nm)=>{ const row = sliceSection('adicionais-de-filmagem-inicial','adicionais-de-filmagem-final').find(r=>r[0]===nm); return sum + parseFloat(row[1]||0); },0);
       const preCost = sel.pre.reduce((sum,nm)=>{ const rowsP=sliceSection('serviços-de-pré-wedding-inicial','serviços-de-pré-wedding-final'); const r=rowsP.find(r=>r[0]===nm); return sum+parseFloat(r[1]||0); },0);
       const km = parseFloat(prompt('Informe distância aproximada (km):'));
       const dispCost = getDisplacementCost(km);
       const total = covCost + addCost + preCost + dispCost;
-      // message
       let msg = `Olá! gostaria de falar sobre este orçamento:`;
       msg += `\nLocal evento: ${sel.address}`;
       msg += `\nPré-wedding: ${sel.pre.length?sel.pre.join(', '):'Não contratado'}`;
@@ -135,7 +147,7 @@
 
   <div id="step1" class="step active">
     <h2>1. Local do Evento</h2>
-    <div id="map-evento" style="width:100%;height:50px;"></div>
+    <div id="map-evento" style="width:100%;height:auto;"></div>
     <div id="step1-btns" class="nav-buttons"></div>
   </div>
   <div id="step2" class="step">
