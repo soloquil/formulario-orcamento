@@ -1,201 +1,129 @@
-// Orçamento Vinicius Barbaro Films
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orçamento Simplificado</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #f9f9f9; margin:0; padding:0; }
+    .container { max-width: 600px; margin: 2rem auto; background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    h2 { color: #0f3d57; margin-bottom: 1rem; }
+    .step { display: none; }
+    .step.active { display: block; }
+    .checkbox-group { margin-bottom: 1rem; }
+    .checkbox-group label { display: block; cursor: pointer; }
+    .nav { text-align: right; }
+    button { background: #0f3d57; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; margin-left: 0.5rem; }
+    button:disabled { background: #ccc; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Orçamento Rápido</h2>
 
-import React, { useState, useEffect } from "react";
-import Papa from "papaparse";
-import { Button } from "@/components/ui/button";
-
-const SERVICE_URL =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vSU-fqjBfA2H6XvQl7iQj04dVs3ZcpLBpfe1oDshpchCKwM5xA2YDnDo3aErtDjH0C3rq0FjxljUkjo/pub?output=csv";
-const MULTIPLIERS_URL =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vTF9euiuflgr2u9eUDoI5WU11uL_d5IqOKbDc7VkidEifW_FdUId4T11Qg2gHwv4kodMfTqHqEwYGm3/pub?output=csv";
-const VIDEO_EDIT_TYPES_URL =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRIYHSrb2-VHg1v-OnkmwKjBAkksm3x1JB2YUuJbl-UIMcNVOdRnqXsChw0koVOJCEDfufYQDLfVPPy/pub?output=csv";
-const VIDEO_ADDITIONALS_URL =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vSBtaad2hZAfvpdIM3L12m9Pgq7hm_OCEC9AgxW6anYUuuPOPAQ1Cjfc89LtMmRQpHHapS3um71eeQU/pub?output=csv";
-
-export default function Orcamento() {
-  const [services, setServices] = useState([]);
-  const [multipliers, setMultipliers] = useState({});
-  const [videoEditTypes, setVideoEditTypes] = useState([]);
-  const [videoAdditionals, setVideoAdditionals] = useState([]);
-  const [selectedServices, setSelectedServices] = useState({});
-  const [selectedVideoEdits, setSelectedVideoEdits] = useState([]);
-  const [selectedVideoAdditionals, setSelectedVideoAdditionals] = useState([]);
-  const [providerCount, setProviderCount] = useState(1);
-  const [isFilmingSelected, setIsFilmingSelected] = useState(false);
-
-  useEffect(() => {
-    Papa.parse(SERVICE_URL, {
-      download: true,
-      header: true,
-      complete: (results) => setServices(results.data),
-    });
-
-    Papa.parse(MULTIPLIERS_URL, {
-      download: true,
-      header: true,
-      complete: (results) => {
-        const data = {};
-        results.data.forEach((row) => {
-          const key = row["Número de Fornecedores"];
-          data[key] = parseFloat(row["Multiplicador"]);
-        });
-        setMultipliers(data);
-      },
-    });
-
-    Papa.parse(VIDEO_EDIT_TYPES_URL, {
-      download: true,
-      header: true,
-      complete: (results) => setVideoEditTypes(results.data),
-    });
-
-    Papa.parse(VIDEO_ADDITIONALS_URL, {
-      download: true,
-      header: true,
-      complete: (results) => setVideoAdditionals(results.data),
-    });
-  }, []);
-
-  const handleServiceToggle = (serviceName) => {
-    const updated = { ...selectedServices };
-    if (updated[serviceName]) {
-      delete updated[serviceName];
-    } else {
-      updated[serviceName] = true;
-    }
-    setSelectedServices(updated);
-    setIsFilmingSelected("Filmagem" in updated);
-  };
-
-  const handleVideoEditToggle = (type) => {
-    const updated = [...selectedVideoEdits];
-    const idx = updated.indexOf(type);
-    if (idx > -1) {
-      updated.splice(idx, 1);
-    } else {
-      updated.push(type);
-    }
-    setSelectedVideoEdits(updated);
-  };
-
-  const handleVideoAdditionalToggle = (service) => {
-    const updated = [...selectedVideoAdditionals];
-    const idx = updated.indexOf(service);
-    if (idx > -1) {
-      updated.splice(idx, 1);
-    } else {
-      updated.push(service);
-    }
-    setSelectedVideoAdditionals(updated);
-  };
-
-  const calculateTotal = () => {
-    const multiplier = multipliers[providerCount] || 1;
-    let total = 0;
-
-    services.forEach((service) => {
-      if (selectedServices[service["Serviço"]]) {
-        const base = parseFloat(service["8h"] || 0); // Exemplo: usar 8h como base
-        total += base * multiplier;
-      }
-    });
-
-    videoEditTypes.forEach((type) => {
-      if (selectedVideoEdits.includes(type["Tipo de Vídeo"])) {
-        total += parseFloat(type["Valor"] || 0);
-      }
-    });
-
-    videoAdditionals.forEach((add) => {
-      if (selectedVideoAdditionals.includes(add["Serviço"])) {
-        total += parseFloat(add["Valor"] || 0);
-      }
-    });
-
-    return total;
-  };
-
-  return (
-    <div className="min-h-screen bg-[#F7F9FC] text-[#1A1A2E] p-6">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold text-center text-[#1A237E] mb-6">
-          Orçamento Vinicius Barbaro Films
-        </h1>
-
-        <div className="space-y-4">
-          <h2 className="text-2xl font-semibold">Selecione os serviços:</h2>
-          {services.map((service, idx) => (
-            <div key={idx} className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={!!selectedServices[service["Serviço"]]}
-                onChange={() => handleServiceToggle(service["Serviço"])}
-              />
-              <label>{service["Serviço"]}</label>
-            </div>
-          ))}
-        </div>
-
-        {isFilmingSelected && (
-          <div className="mt-6 space-y-4">
-            <h3 className="text-xl font-semibold">Tipos de Edição de Vídeo (obrigatório):</h3>
-            {videoEditTypes.map((type, idx) => (
-              <div key={idx} className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={selectedVideoEdits.includes(type["Tipo de Vídeo"])}
-                  onChange={() => handleVideoEditToggle(type["Tipo de Vídeo"])}
-                />
-                <label>
-                  {type["Tipo de Vídeo"]} - R$ {parseFloat(type["Valor"]).toFixed(2)}
-                </label>
-              </div>
-            ))}
-
-            <h3 className="text-xl font-semibold mt-4">Adicionais de Vídeo:</h3>
-            {videoAdditionals.map((add, idx) => (
-              <div key={idx} className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={selectedVideoAdditionals.includes(add["Serviço"])}
-                  onChange={() => handleVideoAdditionalToggle(add["Serviço"])}
-                />
-                <label>
-                  {add["Serviço"]} - R$ {parseFloat(add["Valor"]).toFixed(2)}
-                </label>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <div className="mt-6 flex justify-between items-center border-t pt-4">
-          <label htmlFor="providers" className="font-semibold">
-            Quantidade de Fornecedores:
-          </label>
-          <input
-            id="providers"
-            type="number"
-            min="1"
-            max="10"
-            value={providerCount}
-            onChange={(e) => setProviderCount(e.target.value)}
-            className="border p-1 w-20"
-          />
-        </div>
-
-        <div className="mt-6 text-center">
-          <h2 className="text-3xl font-bold text-[#0D47A1]">
-            Total: R$ {calculateTotal().toFixed(2)}
-          </h2>
-        </div>
-
-        <div className="mt-6 text-center">
-          <Button disabled={isFilmingSelected && selectedVideoEdits.length === 0}>
-            Próximo passo
-          </Button>
-        </div>
+    <!-- Step 1: Serviços do Dia -->
+    <div id="step1" class="step active">
+      <h3>1. Serviços do Dia</h3>
+      <div class="checkbox-group">
+        <label><input type="checkbox" id="service-photo"> Fotografia</label>
+        <label><input type="checkbox" id="service-video"> Filmagem</label>
+        <label><input type="checkbox" id="service-story"> Storymaker</label>
+      </div>
+      <div id="video-options" class="checkbox-group" style="display:none;">
+        <strong>Tipos de Vídeo:</strong>
+        <label><input type="checkbox" class="video-type" value="video teaser - geral"> video teaser - geral</label>
+        <label><input type="checkbox" class="video-type" value="video teaser - balada"> video teaser - balada</label>
+        <label><input type="checkbox" class="video-type" value="video film (15m)"> video film (15m)</label>
+        <label><input type="checkbox" class="video-type" value="video cerimonial"> video cerimonial</label>
+        <label><input type="checkbox" class="video-type" value="video teaser - making off"> video teaser - making off</label>
+        <label><input type="checkbox" class="video-type" value="video teaser - cerimonial"> video teaser - cerimonial</label>
+        <label><input type="checkbox" class="video-type" value="video teaser - ensaio dos noivos"> video teaser - ensaio dos noivos</label>
+        <label><input type="checkbox" class="video-type" value="video short film (7m)"> video short film (7m)</label>
+        <label><input type="checkbox" class="video-type" value="video long film (30m)"> video long film (30m)</label>
+        <label><input type="checkbox" class="video-type" value="video extended film (50m)"> video extended film (50m)</label>
+      </div>
+      <div id="video-additionals" class="checkbox-group" style="display:none;">
+        <strong>Adicionais de Vídeo:</strong>
+        <label><input type="checkbox" class="video-add" value="drone ambientação"> drone ambientação</label>
+        <label><input type="checkbox" class="video-add" value="drone completo"> drone completo</label>
+        <label><input type="checkbox" class="video-add" value="sameday edit"> sameday edit</label>
+      </div>
+      <div class="nav">
+        <button id="next1" onclick="goStep(2)">Próximo</button>
       </div>
     </div>
-  );
-}
+
+    <!-- Step 2: Pré-Wedding -->
+    <div id="step2" class="step">
+      <h3>2. Pré-Wedding</h3>
+      <div class="checkbox-group">
+        <label><input type="checkbox" id="pre-photo" value="Pré-wedding foto"> Pré-wedding foto</label>
+        <label><input type="checkbox" id="pre-video" value="Pré-wedding vídeo"> Pré-wedding vídeo</label>
+      </div>
+      <div class="nav">
+        <button onclick="goStep(1)">Voltar</button>
+        <button id="sendBtn" onclick="sendWhats()">Enviar WhatsApp</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function goStep(n) {
+      document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+      document.getElementById('step'+n).classList.add('active');
+    }
+
+    function toggleVideoSections() {
+      const videoChecked = document.getElementById('service-video').checked;
+      document.getElementById('video-options').style.display = videoChecked ? 'block' : 'none';
+      document.getElementById('video-additionals').style.display = videoChecked ? 'block' : 'none';
+      checkNext1();
+    }
+
+    document.getElementById('service-video').addEventListener('change', toggleVideoSections);
+    document.querySelectorAll('#service-photo, #service-story').forEach(el => el.addEventListener('change', checkNext1));
+    document.querySelectorAll('.video-type').forEach(el => el.addEventListener('change', checkNext1));
+
+    function checkNext1() {
+      const videoChecked = document.getElementById('service-video').checked;
+      let enable = true;
+      if(videoChecked) {
+        const anyType = document.querySelectorAll('.video-type:checked').length > 0;
+        enable = anyType;
+      }
+      document.getElementById('next1').disabled = !enable;
+    }
+
+    function sendWhats() {
+      const services = [];
+      if(document.getElementById('service-photo').checked) services.push('Fotografia');
+      if(document.getElementById('service-video').checked) services.push('Filmagem');
+      if(document.getElementById('service-story').checked) services.push('Storymaker');
+
+      const hasVideo = document.getElementById('service-video').checked;
+      const videoTypes = Array.from(document.querySelectorAll('.video-type:checked')).map(i => i.value);
+      const additionals = Array.from(document.querySelectorAll('.video-add:checked')).map(i => i.value);
+      const pre = [];
+      if(document.getElementById('pre-photo').checked) pre.push('Pré-wedding foto');
+      if(document.getElementById('pre-video').checked) pre.push('Pré-wedding vídeo');
+
+      let msg = 'Olá! gostaria de falar sobre este orçamento:';
+      msg += '\nServiços do dia: ' + (services.length ? services.join(', ') : 'Nenhum');
+      if(videoTypes.length) msg += '\nTipos de Vídeo: ' + videoTypes.join(', ');
+      if(hasVideo && (videoTypes.length || additionals.length)) {
+        msg += '\nAdicionais de Vídeo: ' + (additionals.length ? additionals.join(', ') : 'Nenhum');
+      }
+      msg += '\nPré-Wedding: ' + (pre.length ? pre.join(', ') : 'Nenhum');
+
+      const url = 'https://wa.me/5511978894210?text=' + encodeURIComponent(msg);
+      window.open(url, '_blank');
+    }
+
+    window.onload = () => {
+      toggleVideoSections();
+      checkNext1();
+    };
+  </script>
+</body>
+</html>
