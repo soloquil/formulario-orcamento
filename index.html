@@ -9,49 +9,41 @@
     .container { max-width: 600px; margin: 2rem auto; background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
     h2 { color: white; background-color: #0f3d57; padding: 1rem; border-radius: 8px; text-align: center; }
     h4 { color: #555; margin-top: 0; margin-bottom: 1.5rem; text-align: center; }
-    .step { display: none; }
-    .step.active { display: block; }
-    .checkbox-group { margin-bottom: 1rem; }
-    .checkbox-group label { display: block; cursor: pointer; }
-    .nav { text-align: right; }
-    button { background: #0f3d57; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; margin-left: 0.5rem; }
-    button:disabled { background: #ccc; cursor: not-allowed; }
-    select, input[type="number"] { width: 100%; padding: 0.5rem; border-radius: 6px; border: 1px solid #ccc; margin-bottom: 1rem; }
-    .price-tag { color: #555; font-size: 0.9em; margin-left: 0.5em; }
+    .group { margin-bottom: 1rem; }
+    label { display: block; margin-bottom: 0.5rem; }
+    input[type="number"], select { width: 100%; padding: 0.5rem; border-radius: 6px; border: 1px solid #ccc; margin-bottom: 1rem; }
+    .price-tag { font-size: 0.9em; color: #555; margin-left: 0.5rem; }
+    .total { text-align: center; font-size: 1.2em; margin: 1rem 0; }
+    .nav { text-align: center; }
+    button { background: #0f3d57; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 6px; cursor: pointer; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>Orçamento Blur Records</h2>
+    <h2>Orçamento Vinicius Barbaro Films</h2>
     <h4>Monte seu pacote personalizado</h4>
 
-    <!-- Step 1: Serviços do Dia -->
-    <div class="checkbox-group">
-      <label><input type="checkbox" id="service-photo"> Fotografia <span class="price-tag" id="preco-foto"></span></label>
-      <label for="foto-fornecedores">Número de fotógrafos:</label>
-      <input type="number" id="foto-fornecedores" min="1" value="1">
+    <!-- Serviços do Dia -->
+    <div class="group">
+      <label><input type="checkbox" id="service-photo"> Fotografia <span id="preco-foto" class="price-tag"></span></label>
+      <input type="number" id="photo-qty" min="1" max="7" value="1">
 
-      <label><input type="checkbox" id="service-video"> Filmagem <span class="price-tag" id="preco-video"></span></label>
-      <label for="video-fornecedores">Número de videomakers:</label>
-      <input type="number" id="video-fornecedores" min="1" value="1">
+      <label><input type="checkbox" id="service-video"> Filmagem <span id="preco-video" class="price-tag"></span></label>
+      <input type="number" id="video-qty" min="1" max="7" value="1">
 
-      <label><input type="checkbox" id="service-story"> Storymaker</label>
-      <label for="story-fornecedores">Número de storytellers:</label>
-      <input type="number" id="story-fornecedores" min="1" value="1">
+      <label><input type="checkbox" id="service-story"> Storymaker <span id="preco-story" class="price-tag"></span></label>
+      <input type="number" id="story-qty" min="1" max="2" value="1">
     </div>
 
-    <div class="checkbox-group">
-      <label for="tempoCobertura">Tempo de cobertura:</label>
-      <select id="tempoCobertura"></select>
+    <div class="group">
+      <label for="cover-time">Tempo de Cobertura:</label>
+      <select id="cover-time"></select>
     </div>
 
-    <div id="video-options" class="checkbox-group" style="display:none;"></div>
-    <div id="video-additionals" class="checkbox-group" style="display:none;"></div>
+    <!-- Adicionais de Vídeo -->
+    <div id="addons" class="group"></div>
 
-    <div class="checkbox-group">
-      <label><input type="checkbox" id="pre-photo" checked disabled> Pré-wedding foto</label>
-      <label><input type="checkbox" id="pre-video" checked disabled> Pré-wedding vídeo</label>
-    </div>
+    <div class="total" id="total-price">Total: R$ 0,00</div>
 
     <div class="nav">
       <button onclick="sendWhats()">Enviar pelo WhatsApp</button>
@@ -59,86 +51,90 @@
   </div>
 
   <script>
-    let precosFotografia = {};
-    let precosFilmagem = {};
-    let tiposVideo = [];
-    let multiplicadores = {};
+    let coverPrices = { photo: {}, video: {} };
+    let multipliers = {};
+    let addons = [];
+    const storyPrice = 400;
 
-    async function carregarPlanilhas() {
-      const resp1 = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vSU-fqjBfA2H6XvQl7iQj04dVs3ZcpLBpfe1oDshpchCKwM5xA2YDnDo3aErtDjH0C3rq0FjxljUkjo/pub?output=csv');
-      const texto1 = await resp1.text();
-      const linhas = texto1.trim().split('\n').map(l => l.split(','));
-      linhas.slice(1).forEach(l => {
-        const tempo = l[0];
-        precosFotografia[tempo] = parseFloat(l[1]);
-        precosFilmagem[tempo] = parseFloat(l[2]);
+    async function init() {
+      try {
+        const r1 = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vSU-fqjBfA2H6XvQl7iQj04dVs3ZcpLBpfe1oDshpchCKwM5xA2YDnDo3aErtDjH0C3rq0FjxljUkjo/pub?output=csv');
+        const t1 = await r1.text();
+        const lines1 = t1.trim().split('\n').map(l=>l.split(','));
+        const times = lines1[0].slice(1);
+        times.forEach((time,i)=>{
+          coverPrices.photo[time] = parseFloat(lines1[1][i+1]);
+          coverPrices.video[time] = parseFloat(lines1[2][i+1]);
+        });
+        document.getElementById('cover-time').innerHTML = times.map(t=>`<option>${t}</option>`).join('');
+
+        const r2 = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vTF9euiuflgr2u9eUDoI5WU11uL_d5IqOKbDc7VkidEifW_FdUId4T11Qg2gHwv4kodMfTqHqEwYGm3/pub?output=csv');
+        const t2 = await r2.text();
+        t2.trim().split('\n').slice(1).forEach(l=>{
+          const [_,qty,m] = l.split(','); multipliers[qty] = parseFloat(m);
+        });
+
+        const r3 = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vSBtaad2hZAfvpdIM3L12m9Pgq7hm_OCEC9AgxW6anYUuuPOPAQ1Cjfc89LtMmRQpHHapS3um71eeQU/pub?output=csv');
+        const t3 = await r3.text();
+        addons = t3.trim().split('\n').slice(1).map(l=>{const [name,val]=l.split(',');return {name,val:parseFloat(val)}});
+        document.getElementById('addons').innerHTML = addons.map((a, i)=>
+          `<label><input type="checkbox" class="addon" value="${a.name}" data-index="${i}"> ${a.name} <span class="price-tag">R$ ${a.val.toFixed(2)}</span></label>`
+        ).join('');
+
+        addListeners(); updateTotal();
+      } catch (error) {
+        alert('Erro ao carregar dados. Verifique sua conexão e tente novamente.');
+        console.error('Erro na inicialização:', error);
+      }
+    }
+
+    function getMultiplier(qty){ return multipliers[qty]||1; }
+
+    function updateTotal(){
+      const time = document.getElementById('cover-time').value;
+      let total=0;
+      if(document.getElementById('service-photo').checked){
+        const q=+document.getElementById('photo-qty').value;
+        total+= coverPrices.photo[time]*getMultiplier(q);
+      }
+      if(document.getElementById('service-video').checked){
+        const q=+document.getElementById('video-qty').value;
+        total+= coverPrices.video[time]*getMultiplier(q);
+      }
+      if(document.getElementById('service-story').checked){
+        const q=+document.getElementById('story-qty').value;
+        total+= storyPrice*q;
+      }
+      document.querySelectorAll('.addon:checked').forEach((el)=> {
+        const i = parseInt(el.getAttribute('data-index'));
+        if (!isNaN(i)) total += addons[i].val;
       });
-
-      const select = document.getElementById('tempoCobertura');
-      select.innerHTML = linhas.slice(1).map(l => `<option value="${l[0]}">${l[0]}</option>`).join('');
-
-      const resp2 = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vSdDX0L9MmbgbM_BPbDRRQ0eRG2NQsb_hb4QFGGlQerKM2oB3UON1z04Ewb01R7CBXu-FU4OW6jcTx7/pub?output=csv');
-      const texto2 = await resp2.text();
-      const linhas2 = texto2.trim().split('\n').map(l => l.split(','));
-      tiposVideo = linhas2.slice(1);
-
-      document.getElementById('video-options').innerHTML = tiposVideo.map(v =>
-        `<label><input type="checkbox" class="video-type" value="${v[0]}"> ${v[0]} <span class="price-tag">R$ ${v[1]}</span></label>`
-      ).join('');
-
-      const resp3 = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vTF9euiuflgr2u9eUDoI5WU11uL_d5IqOKbDc7VkidEifW_FdUId4T11Qg2gHwv4kodMfTqHqEwYGm3/pub?output=csv');
-      const texto3 = await resp3.text();
-      const linhas3 = texto3.trim().split('\n').map(l => l.split(','));
-      linhas3.slice(1).forEach(l => multiplicadores[l[1]] = parseFloat(l[2]));
-
-      atualizarPrecos();
-      addEventListeners();
+      document.getElementById('total-price').textContent = `Total: R$ ${total.toFixed(2)}`;
     }
 
-    function atualizarPrecos() {
-      const tempo = document.getElementById('tempoCobertura').value;
-      const fotoQtd = document.getElementById('foto-fornecedores').value || 1;
-      const videoQtd = document.getElementById('video-fornecedores').value || 1;
-
-      const precoFoto = precosFotografia[tempo] * (multiplicadores[fotoQtd] || 1);
-      const precoVideo = precosFilmagem[tempo] * (multiplicadores[videoQtd] || 1);
-
-      document.getElementById('preco-foto').textContent = !isNaN(precoFoto) ? `R$ ${precoFoto.toFixed(2)}` : '';
-      document.getElementById('preco-video').textContent = !isNaN(precoVideo) ? `R$ ${precoVideo.toFixed(2)}` : '';
+    function addListeners(){
+      ['service-photo','service-video','service-story','photo-qty','video-qty','story-qty','cover-time']
+      .forEach(id=>document.getElementById(id).addEventListener('change',updateTotal));
+      document.querySelectorAll('.addon').forEach(el=>el.addEventListener('change',updateTotal));
     }
 
-    function toggleVideoSections() {
-      const isChecked = document.getElementById('service-video').checked;
-      document.getElementById('video-options').style.display = isChecked ? 'block' : 'none';
-      document.getElementById('video-additionals').style.display = isChecked ? 'block' : 'none';
+    function sendWhats(){
+      const time=document.getElementById('cover-time').value;
+      const services=[];
+      if(document.getElementById('service-photo').checked) services.push(`Fotografia x${document.getElementById('photo-qty').value}`);
+      if(document.getElementById('service-video').checked) services.push(`Filmagem x${document.getElementById('video-qty').value}`);
+      if(document.getElementById('service-story').checked) services.push(`Storymaker x${document.getElementById('story-qty').value}`);
+      const adds=Array.from(document.querySelectorAll('.addon:checked')).map(a=>a.value);
+      const totalText = document.getElementById('total-price').textContent;
+      let msg=`Olá! Gostaria deste orçamento:`;
+      msg+=`\nTempo de cobertura: ${time}`;
+      msg+=`\nServiços: ${services.join(', ')||'Nenhum'}`;
+      if(adds.length) msg+=`\nAdicionais: ${adds.join(', ')}`;
+      msg+=`\n${totalText}`;
+      window.open('https://wa.me/5511978894210?text='+encodeURIComponent(msg),'_blank');
     }
 
-    function addEventListeners() {
-      document.getElementById('tempoCobertura').addEventListener('change', atualizarPrecos);
-      document.getElementById('foto-fornecedores').addEventListener('input', atualizarPrecos);
-      document.getElementById('video-fornecedores').addEventListener('input', atualizarPrecos);
-      document.getElementById('service-video').addEventListener('change', toggleVideoSections);
-    }
-
-    function sendWhats() {
-      const services = [];
-      if(document.getElementById('service-photo').checked) services.push('Fotografia');
-      if(document.getElementById('service-video').checked) services.push('Filmagem');
-      if(document.getElementById('service-story').checked) services.push('Storymaker');
-
-      const videoTypes = Array.from(document.querySelectorAll('.video-type:checked')).map(i => i.value);
-      const tempo = document.getElementById('tempoCobertura').value;
-      let msg = 'Olá! gostaria de falar sobre este orçamento:';
-      msg += `\nTempo de cobertura: ${tempo}`;
-      msg += '\nServiços do dia: ' + (services.length ? services.join(', ') : 'Nenhum');
-      if(videoTypes.length) msg += '\nTipos de Vídeo: ' + videoTypes.join(', ');
-      msg += '\nPré-Wedding: Pré-wedding foto, Pré-wedding vídeo';
-
-      const url = 'https://wa.me/5511978894210?text=' + encodeURIComponent(msg);
-      window.open(url, '_blank');
-    }
-
-    window.onload = carregarPlanilhas;
+    window.onload = init;
   </script>
 </body>
 </html>
