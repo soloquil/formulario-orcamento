@@ -5,147 +5,112 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Orçamento Vinicius Barbaro Films</title>
   <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #fdfdfd url('https://www.transparenttextures.com/patterns/white-marble.png');
-      color: #2b2b2b;
-    }
-    header {
-      background-color: #0f3d57;
-      color: white;
-      padding: 1rem;
-      text-align: center;
-      font-size: 1.8rem;
-      font-weight: bold;
-    }
-    section {
-      max-width: 700px;
-      margin: 2rem auto;
-      background: white;
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    }
-    h2 {
-      color: #0f3d57;
-      font-size: 1.4rem;
-      margin-bottom: 1rem;
-    }
-    label {
-      display: block;
-      margin: 0.5rem 0 0.2rem;
-      font-weight: 500;
-    }
-    select, input[type="number"] {
-      width: 100%;
-      padding: 0.5rem;
-      margin-bottom: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
-    button {
-      background: #0f3d57;
-      color: white;
-      border: none;
-      padding: 0.8rem 1.5rem;
-      font-size: 1rem;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    button:hover {
-      background: #0d2e41;
-    }
-    .step {
-      display: none;
-    }
-    .step.active {
-      display: block;
-    }
-    .footer {
-      text-align: center;
-      font-size: 0.8rem;
-      margin-top: 3rem;
-      color: #888;
-    }
+    body { margin:0; font-family:'Segoe UI',sans-serif; background:#fdfdfd url('https://www.transparenttextures.com/patterns/white-marble.png'); color:#2b2b2b; }
+    header { background:#0f3d57; color:#fff; padding:1rem; text-align:center; font-size:1.8rem; }
+    .step { display:none; max-width:700px; margin:2rem auto; background:#fff; padding:2rem; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.1);}    
+    .step.active { display:block; }
+    h2 { color:#0f3d57; margin-bottom:1rem; }
+    label { display:block; margin:0.5rem 0; font-weight:500; }
+    select,input { width:100%; padding:0.5rem; margin-bottom:1rem; border:1px solid #ccc; border-radius:6px; }
+    button { background:#0f3d57; color:#fff; border:none; padding:0.8rem 1.5rem; border-radius:8px; cursor:pointer; transition:0.3s; }
+    button:hover { background:#0d2e41; }
+    .footer { text-align:center; font-size:0.8rem; color:#888; margin:2rem 0; }
   </style>
 </head>
 <body>
-  <header>
-    Vinicius Barbaro Films – Solicitação de Orçamento
-  </header>
-  <section id="step1" class="step active">
-    <h2>Passo 1: Cobertura do Dia</h2>
-    <label for="cobertura-select">Duração da Cobertura:</label>
+  <header>Vinicius Barbaro Films – Orçamento</header>
+
+  <!-- Step 1: Cobertura -->
+  <div id="step1" class="step active">
+    <h2>1. Cobertura do Dia</h2>
+    <label>Duração da Cobertura</label>
     <select id="cobertura-select"></select>
+    <label>Fotógrafos (quant.)</label>
+    <input type="number" id="fotografos" min="0" />
+    <label>Cinegrafistas (quant.)</label>
+    <input type="number" id="cinegrafistas" min="0" />
+    <label>Storymakers (max 2)</label>
+    <input type="number" id="storymakers" min="0" max="2" />
+    <button onclick="nextStep()">Avançar</button>
+  </div>
 
-    <label for="fotografos">Quantidade de Fotógrafos:</label>
-    <input type="number" id="fotografos" min="0" max="7" value="1" />
+  <!-- Step 2: Estilos de Vídeo -->
+  <div id="step2" class="step">
+    <h2>2. Estilos de Vídeo</h2>
+    <div id="video-estilos"></div>
+    <button onclick="nextStep()">Avançar</button>
+  </div>
 
-    <label for="cinegrafistas">Quantidade de Cinegrafistas:</label>
-    <input type="number" id="cinegrafistas" min="0" max="7" value="1" />
+  <!-- Step 3: Adicionais de Filmagem -->
+  <div id="step3" class="step">
+    <h2>3. Adicionais de Filmagem</h2>
+    <div id="adicionais-video"></div>
+    <button onclick="nextStep()">Avançar</button>
+  </div>
 
-    <label for="storymakers">Quantidade de Storymakers (máx. 2):</label>
-    <input type="number" id="storymakers" min="0" max="2" value="0" />
+  <!-- Step 4: Local do Evento -->
+  <div id="step4" class="step">
+    <h2>4. Local do Evento</h2>
+    <div id="map-evento" style="width:100%;height:300px; background:#eee"></div>
+    <button onclick="nextStep()">Avançar</button>
+  </div>
 
-    <button onclick="nextStep()">Continuar</button>
-  </section>
+  <!-- Step 5: Serviços de Pré-Wedding -->
+  <div id="step5" class="step">
+    <h2>5. Pré-Wedding</h2>
+    <div id="prewedding-servicos"></div>
+    <button onclick="handlePreWed()" id="btn-pre">Avançar</button>
+  </div>
 
-  <section id="step2" class="step">
-    <h2>Passo 2: Estilos de Vídeo</h2>
-    <form id="video-estilos-form"></form>
-    <button onclick="nextStep()">Continuar</button>
-  </section>
+  <!-- Step 6: Local do Pré-Wedding -->
+  <div id="step6" class="step">
+    <h2>6. Local do Pré-Wedding</h2>
+    <div id="map-pre"></div>
+    <button onclick="nextStep()">Avançar</button>
+  </div>
+
+  <!-- Step 7: Resumo e Envio -->
+  <div id="step7" class="step">
+    <h2>7. Resumo</h2>
+    <pre id="resumo"></pre>
+    <button onclick="enviarWhats()">Enviar via WhatsApp</button>
+  </div>
 
   <div class="footer">© 2025 Vinicius Barbaro Films</div>
 
   <script>
-    let currentStep = 1;
-    const stepCount = 2;
+    let step=1;
+    function nextStep(){ document.getElementById('step'+step).classList.remove('active'); step++; document.getElementById('step'+step).classList.add('active'); }
+    function handlePreWed(){ /* lógica para pular ou mostrar mapa */ nextStep(); }
 
-    function nextStep() {
-      if (currentStep < stepCount) {
-        document.getElementById(`step${currentStep}`).classList.remove('active');
-        currentStep++;
-        document.getElementById(`step${currentStep}`).classList.add('active');
-      }
+    async function loadDados(){
+      const resp = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vSU-fqjBfA2H6XvQl7iQj04dVs3ZcpLBpfe1oDshpchCKwM5xA2YDnDo3aErtDjH0C3rq0FjxljUkjo/pub?output=csv');
+      const txt = await resp.text();
+      const rows = txt.split('\n').map(r=>r.split(','));
+      const idx = tag=>rows.findIndex(r=>r[0]===tag);
+
+      // Step1: cobertura tags
+      const sc=idx('duração-de-cobertura-inicial'), ec=idx('duração-de-cobertura-final');
+      for(let i=sc+1;i<ec;i++){ rows[i].slice(1).forEach(opt=>{
+          if(opt) document.getElementById('cobertura-select').append(new Option(opt,opt)); }); }
+
+      // Step2: video estilos
+      const sv=idx('estilos-de-video-inicial'), ev=idx('estilos-de-video-final');
+      for(let i=sv+1;i<ev;i++){ let nm=rows[i][0]; if(nm) document.getElementById('video-estilos').innerHTML+=`<label><input type=checkbox value="${nm}"> ${nm}</label>`; }
+
+      // Step3: adicionais de filmagem
+      const sa=idx('adicionais-de-filmagem-inicial'), ea=idx('adicionais-de-filmagem-final');
+      for(let i=sa+1;i<ea;i++){ let nm=rows[i][0]; if(nm) document.getElementById('adicionais-video').innerHTML+=`<label><input type=checkbox value="${nm}"> ${nm}</label>`; }
+
+      // Step5: pre-wedding
+      const sp=idx('serviços-pré-wedding-inicial'), ep=idx('serviços-pré-wedding-final');
+      for(let i=sp+1;i<ep;i++){ let nm=rows[i][0]; if(nm) document.getElementById('prewedding-servicos').innerHTML+=`<label><input type=checkbox value="${nm}"> ${nm}</label>`; }
+
+      // Outros steps (deslocamento, etc) você deve definir tags semelhantes na planilha
     }
+    window.onload=loadDados;
 
-    async function loadPlanilhaDados() {
-      const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSU-fqjBfA2H6XvQl7iQj04dVs3ZcpLBpfe1oDshpchCKwM5xA2YDnDo3aErtDjH0C3rq0FjxljUkjo/pub?output=csv";
-      const response = await fetch(url);
-      const data = await response.text();
-      const rows = data.split("\n").map(r => r.split(","));
-
-      // Preencher coberturas a partir da primeira linha (linha 0), ignorando a primeira coluna (índice 0)
-      const primeiraLinha = rows[0];
-      const coberturaSelect = document.getElementById("cobertura-select");
-      for (let i = 1; i < primeiraLinha.length; i++) {
-        const opcao = document.createElement("option");
-        opcao.value = primeiraLinha[i];
-        opcao.textContent = primeiraLinha[i];
-        coberturaSelect.appendChild(opcao);
-      }
-
-      // Preencher estilos de vídeo da aba "estilos de video do dia"
-      const estiloInicio = rows.findIndex(r => r[0].toLowerCase().includes("estilos de video do dia")) + 1;
-      const estiloForm = document.getElementById("video-estilos-form");
-      for (let i = estiloInicio; i < rows.length; i++) {
-        const nome = rows[i][0];
-        if (!nome || nome.trim() === "") break;
-        const label = document.createElement("label");
-        const input = document.createElement("input");
-        input.type = "checkbox";
-        input.name = "video_estilo";
-        input.value = nome;
-        label.appendChild(input);
-        label.append(" " + nome);
-        estiloForm.appendChild(label);
-      }
-    }
-
-    window.onload = loadPlanilhaDados;
+    function enviarWhats(){ /* coletar dados, montar mensagem e abrir WhatsApp */ }
   </script>
 </body>
 </html>
