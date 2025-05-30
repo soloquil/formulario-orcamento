@@ -128,18 +128,19 @@
         coberturaSelect.appendChild(opcao);
       }
 
-      // Preencher estilos de vídeo
-      const estiloInicio = rows.findIndex(r => r[0] === "estilos de video do dia") + 1;
+      // Preencher estilos de vídeo da aba "estilos de video do dia"
+      const estiloInicio = rows.findIndex(r => r[0].toLowerCase().includes("estilos de video do dia")) + 1;
       const estiloForm = document.getElementById("video-estilos-form");
       for (let i = estiloInicio; i < rows.length; i++) {
-        if (!rows[i][0]) break;
+        const nome = rows[i][0];
+        if (!nome || nome.trim() === "") break;
         const label = document.createElement("label");
         const input = document.createElement("input");
         input.type = "checkbox";
         input.name = "video_estilo";
-        input.value = rows[i][0];
+        input.value = nome;
         label.appendChild(input);
-        label.append(" " + rows[i][0]);
+        label.append(" " + nome);
         estiloForm.appendChild(label);
       }
     }
