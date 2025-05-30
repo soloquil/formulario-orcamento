@@ -2,284 +2,181 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Orçamento Completo</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/papaparse/5.4.1/papaparse.min.js"></script>
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDkUBDgCyX6btyclRv2Gw41PR111VVzlOQ&libraries=places"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orçamento - Vinicius Barbato Films</title>
   <style>
-    body { font-family: Arial, sans-serif; max-width: 700px; margin: 30px auto; padding: 0 15px; }
-    h2 { margin-top: 40px; }
-    .step { display: none; }
-    .step.active { display: block; }
-    .buttons { margin-top: 20px; }
-    button { padding: 10px 20px; margin: 0 5px; cursor: pointer; }
-    .map { width: 100%; height: 300px; margin-top: 10px; }
-    label { display: block; margin: 10px 0 5px; }
-    select, input[type=text] { width: 100%; padding: 8px; }
-    .checkbox-group label { display: inline-block; margin-right: 15px; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #fdfdfd url('https://www.transparenttextures.com/patterns/marble.png');
+      color: #1f2c3f;
+    }
+    header {
+      background-color: #1a2b44;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+    main {
+      max-width: 800px;
+      margin: 2rem auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    }
+    h1, h2 {
+      color: #1a2b44;
+    }
+    label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+    input, select, button, textarea {
+      width: 100%;
+      padding: 0.6rem;
+      margin-top: 0.4rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+    button {
+      background-color: #1a2b44;
+      color: white;
+      font-weight: bold;
+      border: none;
+      margin-top: 1.5rem;
+      cursor: pointer;
+    }
+    .step {
+      display: none;
+    }
+    .step.active {
+      display: block;
+    }
+    #map {
+      width: 100%;
+      height: 300px;
+      margin-top: 1rem;
+    }
   </style>
 </head>
 <body>
+  <header>
+    <h1>Solicite seu Orçamento</h1>
+  </header>
+  <main>
+    <form id="formularioOrcamento">
+      <div class="step active" id="step1">
+        <h2>1. Cobertura do Dia</h2>
+        <label>Quantidade de Fotógrafos</label>
+        <select id="qtdFotografos">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+        </select>
 
-  <h1>Formulário de Orçamento</h1>
+        <label>Quantidade de Cinegrafistas</label>
+        <select id="qtdCinegrafistas">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+        </select>
 
-  <!-- Passo 1 -->
-  <div id="step1" class="step active">
-    <h2>1. Seleção de Coberturas do Dia</h2>
-    <label for="duracao">Duração da Cobertura:</label>
-    <select id="duracao"></select>
+        <label>Storymakers</label>
+        <select id="qtdStorymakers">
+          <option value="0">0</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+        </select>
 
-    <div id="fornecedores"></div>
+        <label>Duração da Cobertura</label>
+        <select id="duracaoCobertura">
+          <option value="4">4 horas</option>
+          <option value="6">6 horas</option>
+          <option value="8">8 horas</option>
+          <option value="10">10 horas</option>
+          <option value="12">12 horas</option>
+          <option value="14">14 horas</option>
+          <option value="15">15h ou mais (personalizado)</option>
+        </select>
 
-    <div class="buttons">
-      <button onclick="nextStep(2)">Próximo</button>
-    </div>
-  </div>
+        <button type="button" onclick="proximaEtapa(2)">Continuar</button>
+      </div>
 
-  <!-- Passo 2 -->
-  <div id="step2" class="step">
-    <h2>2. Estilos de Vídeo Contratados</h2>
-    <div id="estilosVideo" class="checkbox-group"></div>
-    <div class="buttons">
-      <button onclick="prevStep(1)">Voltar</button>
-      <button onclick="nextStep(3)">Próximo</button>
-    </div>
-  </div>
+      <div class="step" id="step2">
+        <h2>2. Estilos de Vídeo</h2>
+        <p>Selecione ao menos um (caso tenha contratado filmagem)</p>
+        <label><input type="checkbox" name="estilosVideo" value="Teaser Geral"> Teaser Geral</label>
+        <label><input type="checkbox" name="estilosVideo" value="Short Film"> Short Film (7min)</label>
+        <label><input type="checkbox" name="estilosVideo" value="Long Film"> Long Film (30min)</label>
+        <label><input type="checkbox" name="estilosVideo" value="Cerimonial"> Cerimonial Completo</label>
+        <button type="button" onclick="proximaEtapa(3)">Próximo</button>
+      </div>
 
-  <!-- Passo 3 -->
-  <div id="step3" class="step">
-    <h2>3. Serviços Adicionais de Vídeo</h2>
-    <div id="addVideo" class="checkbox-group"></div>
-    <div class="buttons">
-      <button onclick="prevStep(2)">Voltar</button>
-      <button onclick="nextStep(4)">Próximo</button>
-    </div>
-  </div>
+      <div class="step" id="step3">
+        <h2>3. Adicionais de Filmagem</h2>
+        <label><input type="checkbox" name="adicionalVideo" value="Drone"> Imagens com Drone</label>
+        <label><input type="checkbox" name="adicionalVideo" value="Vídeo Extra"> Vídeo Extra</label>
+        <button type="button" onclick="proximaEtapa(4)">Próximo</button>
+      </div>
 
-  <!-- Passo 4 -->
-  <div id="step4" class="step">
-    <h2>4. Local do Evento</h2>
-    <input id="inputLocal" type="text" placeholder="Busque o local..." />
-    <div id="mapLocal" class="map"></div>
-    <div class="buttons">
-      <button onclick="prevStep(3)">Voltar</button>
-      <button onclick="nextStep(5)">Próximo</button>
-    </div>
-  </div>
+      <div class="step" id="step4">
+        <h2>4. Local do Evento</h2>
+        <div id="map"></div>
+        <button type="button" onclick="proximaEtapa(5)">Próximo</button>
+      </div>
 
-  <!-- Passo 5 -->
-  <div id="step5" class="step">
-    <h2>5. Serviços de Pré-Wedding</h2>
-    <div id="preWedding" class="checkbox-group"></div>
-    <div class="buttons">
-      <button onclick="prevStep(4)">Voltar</button>
-      <button id="btnPreNext" onclick="handlePreWeddingNext()">Não quero pré-wedding</button>
-    </div>
-  </div>
+      <div class="step" id="step5">
+        <h2>5. Pré-Wedding</h2>
+        <label><input type="checkbox" id="querPreWedding"> Desejo fazer pré-wedding</label>
+        <label>Duração:</label>
+        <select id="tempoPreWedding">
+          <option value="2">Até 2h</option>
+          <option value="4">Até 4h</option>
+        </select>
+        <button type="button" onclick="proximaEtapa(6)">Próximo</button>
+      </div>
 
-  <!-- Passo 6 -->
-  <div id="step6" class="step">
-    <h2>6. Local do Pré-Wedding</h2>
-    <input id="inputPreLocal" type="text" placeholder="Busque o local..." />
-    <div id="mapPreLocal" class="map"></div>
-    <div class="buttons">
-      <button onclick="prevStep(5)">Voltar</button>
-      <button onclick="nextStep(7)">Próximo</button>
-    </div>
-  </div>
+      <div class="step" id="step6">
+        <h2>6. Local do Pré-Wedding</h2>
+        <div id="mapPreWedding"></div>
+        <button type="button" onclick="proximaEtapa(7)">Ver Orçamento</button>
+      </div>
 
-  <!-- Passo 7 -->
-  <div id="step7" class="step">
-    <h2>7. Revisão e Envio</h2>
-    <pre id="resumo"></pre>
-    <div class="buttons">
-      <button onclick="prevStep(preWeddingSelected ? 6 : 4)">Voltar</button>
-      <button onclick="enviarWhats()">Enviar Orçamento</button>
-    </div>
-  </div>
+      <div class="step" id="step7">
+        <h2>7. Valor Final e Contato</h2>
+        <p id="resumoOrcamento">Carregando resumo...</p>
+        <a id="botaoWhatsApp" href="#" target="_blank">
+          <button type="button">Solicitar pelo WhatsApp</button>
+        </a>
+      </div>
+    </form>
+  </main>
 
-<script>
-  // URLs dos CSVs publicados
-  const URL_COBERTURAS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSU-fqjBfA2H6XvQl7iQj04dVs3ZcpLBpfe1oDshpchCKwM5xA2YDnDo3aErtDjH0C3rq0FjxljUkjo/pub?gid=0&single=true&output=csv';
-  const URL_MULTIPLICATIVO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSU-fqjBfA2H6XvQl7iQj04dVs3ZcpLBpfe1oDshpchCKwM5xA2YDnDo3aErtDjH0C3rq0FjxljUkjo/pub?gid=1&single=true&output=csv';
-  const URL_ESTILOS   = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSU-fqjBfA2H6XvQl7iQj04dVs3ZcpLBpfe1oDshpchCKwM5xA2YDnDo3aErtDjH0C3rq0FjxljUkjo/pub?gid=2&single=true&output=csv';
-  const URL_ADICIONAL  = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSU-fqjBfA2H6XvQl7iQj04dVs3ZcpLBpfe1oDshpchCKwM5xA2YDnDo3aErtDjH0C3rq0FjxljUkjo/pub?gid=3&single=true&output=csv';
-  const URL_PREWED     = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSU-fqjBfA2H6XvQl7iQj04dVs3ZcpLBpfe1oDshpchCKwM5xA2YDnDo3aErtDjH0C3rq0FjxljUkjo/pub?gid=4&single=true&output=csv';
-  const URL_DESLOC     = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSU-fqjBfA2H6XvQl7iQj04dVs3ZcpLBpfe1oDshpchCKwM5xA2YDnDo3aErtDjH0C3rq0FjxljUkjo/pub?gid=5&single=true&output=csv';
-
-  let coberturas = [], multiplicativo = [], estilos = [], adicional = [], prewed = [], desloc = [];
-  let duracaoSel, fornecedoresSel = {}, estilosSel = [], addVidSel = [], localEvt, preWeddingSelected = false, localPreEvt;
-
-  // Carrega todas as abas
-  function loadSheet(url, callback) {
-    Papa.parse(url, { download: true, header: true, complete: res => callback(res.data) });
-  }
-  function init() {
-    loadSheet(URL_COBERTURAS, data=>{ coberturas = data; populaDuracao(); });
-    loadSheet(URL_MULTIPLICATIVO, data=> multiplicativo = data);
-    loadSheet(URL_ESTILOS, data=> populaCheckbox(data, 'estilosVideo'));
-    loadSheet(URL_ADICIONAL, data=> populaCheckbox(data, 'addVideo'));
-    loadSheet(URL_PREWED, data=> populaCheckbox(data, 'preWedding'));
-    loadSheet(URL_DESLOC, data=> desloc = data);
-    initMap('inputLocal', 'mapLocal', v=>localEvt=v);
-    initMap('inputPreLocal', 'mapPreLocal', v=>localPreEvt=v);
-  }
-
-  // Popula select duração
-  function populaDuracao() {
-    const sel = document.getElementById('duracao');
-    coberturas.forEach(r => {
-      sel.insertAdjacentHTML('beforeend',
-        `<option value="${r.Horas}">${r.Horas} ${r.Horas>1?'horas':'hora'}</option>`
-      );
-    });
-    sel.onchange = ()=> populaFornecedores();
-  }
-
-  // Popula número de fornecedores baseado em multiplicativo
-  function populaFornecedores() {
-    duracaoSel = document.getElementById('duracao').value;
-    const div = document.getElementById('fornecedores');
-    div.innerHTML = '';
-    ['filmagem','fotografia','storymaker'].forEach(tipo => {
-      const mult = multiplicativo.find(r=>r.Tipo===tipo && +r.Horas===+duracaoSel).Multiplicador;
-      const max = tipo==='storymaker'?2:Math.floor(mult);
-      div.insertAdjacentHTML('beforeend',
-        `<label>${tipo.charAt(0).toUpperCase()+tipo.slice(1)} (max ${max}): 
-           <input type="number" id="forn_${tipo}" min="0" max="${max}" value="0" />
-         </label>`
-      );
-    });
-  }
-
-  // Popula checklist genérica
-  function populaCheckbox(data, containerId) {
-    const div = document.getElementById(containerId);
-    data.forEach(r => {
-      div.insertAdjacentHTML('beforeend',
-        `<label><input type="checkbox" value="${r.Codigo}" /> ${r.Nome} (R$ ${r.Preco})</label>`
-      );
-    });
-  }
-
-  // Inicializa o mapa com Autocomplete e marker arrastável
-  function initMap(inputId, mapId, callback) {
-    const input = document.getElementById(inputId);
-    const mapDiv = document.getElementById(mapId);
-    const autocomplete = new google.maps.places.Autocomplete(input);
-    const map = new google.maps.Map(mapDiv, { center:{lat:-23.55052, lng:-46.633308}, zoom:13 });
-    const marker = new google.maps.Marker({ map, draggable:true });
-    autocomplete.bindTo('bounds', map);
-    autocomplete.addListener('place_changed', ()=>{
-      const place = autocomplete.getPlace();
-      if (!place.geometry) return;
-      map.panTo(place.geometry.location);
-      map.setZoom(15);
-      marker.setPosition(place.geometry.location);
-      callback(place.formatted_address);
-    });
-    marker.addListener('dragend', ()=>{
-      const pos = marker.getPosition();
-      new google.maps.Geocoder().geocode({ location: pos }, (results)=> {
-        if(results[0]) {
-          input.value = results[0].formatted_address;
-          callback(results[0].formatted_address);
-        }
-      });
-    });
-  }
-
-  // Navegação
-  function nextStep(n) {
-    document.querySelector('.step.active').classList.remove('active');
-    document.getElementById('step'+n).classList.add('active');
-  }
-  function prevStep(n) { nextStep(n); }
-
-  // Passo 5: Trata botão de pré-wed
-  function handlePreWeddingNext() {
-    preWeddingSelected = !![...document.querySelectorAll('#preWedding input:checked')].length;
-    document.getElementById('btnPreNext').textContent = preWeddingSelected ? 'Continuar' : 'Pular pré-wedding';
-    nextStep(preWeddingSelected?6:7);
-  }
-
-  // Cálculo final + WhatsApp
-  async function enviarWhats() {
-    // 1) Cobertura
-    const numFilmagem    = +document.getElementById('forn_filmagem').value;
-    const numFotografia  = +document.getElementById('forn_fotografia').value;
-    const numStorymaker  = +document.getElementById('forn_storymaker').value;
-    let total = 0;
-    // soma cada tipo
-    total += numFilmagem   * coberturas.find(r=>+r.Horas===+duracaoSel).PrecoFilmagem   * multiplicativo.find(r=>r.Tipo==='filmagem'  && +r.Horas===+duracaoSel).Multiplicador;
-    total += numFotografia * coberturas.find(r=>+r.Horas===+duracaoSel).PrecoFotografia * multiplicativo.find(r=>r.Tipo==='fotografia'&& +r.Horas===+duracaoSel).Multiplicador;
-    total += numStorymaker * coberturas.find(r=>+r.Horas===+duracaoSel).PrecoStory    * multiplicativo.find(r=>r.Tipo==='storymaker'&& +r.Horas===+duracaoSel).Multiplicador;
-
-    // 2) Estilos vídeo
-    [...document.querySelectorAll('#estilosVideo input:checked')].forEach(cb=>{
-      const reg = estilos.find(r=>r.Codigo===cb.value);
-      total += +reg.Preco;
-    });
-
-    // 3) Adicionais vídeo
-    [...document.querySelectorAll('#addVideo input:checked')].forEach(cb=>{
-      const reg = adicional.find(r=>r.Codigo===cb.value);
-      total += +reg.Preco;
-    });
-
-    // 4) Deslocamento evento
-    const distEvt = await calcDistance(localEvt);
-    const faixaEvt = desloc.find(d=>+d.Km>=Math.floor(distEvt));
-    total += +faixaEvt.Valor;
-
-    // 5) Pré-wedding
-    if (preWeddingSelected) {
-      const codPre = document.querySelector('#preWedding input:checked').value;
-      const regPre = prewed.find(r=>r.Codigo===codPre);
-      total += +regPre.Preco;
-      // deslocamento pré-wed
-      const distPre = await calcDistance(localPreEvt);
-      const faixaPre = desloc.find(d=>+d.Km>=Math.floor(distPre));
-      total += +faixaPre.Valor;
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDkUBDgCyX6btyclRv2Gw41PR111VVzlOQ&callback=initMap&libraries=places" async defer></script>
+  <script>
+    let etapaAtual = 1;
+    function proximaEtapa(n) {
+      document.querySelector(`#step${etapaAtual}`).classList.remove('active');
+      etapaAtual = n;
+      document.querySelector(`#step${etapaAtual}`).classList.add('active');
     }
 
-    // Resumo
-    let msg = `Olá! Gostaria de orçamento para:\nCobertura: ${duracaoSel}h\n` +
-      `Filmagem: x${numFilmagem}, Fotografia: x${numFotografia}, Storymaker: x${numStorymaker}\n` +
-      `Local evento: ${localEvt} (dist ${distEvt.toFixed(1)}km)\n`;
-    if (preWeddingSelected) {
-      msg += `Pré-wedding: ${prewed.find(r=>r.Codigo===codPre).Nome}\nLocal pré-wed: ${localPreEvt}\n`;
-    }
-    msg += `Total: R$ ${total.toFixed(2).replace('.',',')}`;
-
-    // Exibe no passo 7
-    document.getElementById('resumo').textContent = msg;
-
-    // Envia no Whats
-    window.open(
-      `https://api.whatsapp.com/send?phone=5511978894210&text=` +
-      encodeURIComponent(msg),
-      '_blank'
-    );
-  }
-
-  // Calcula distância entre endereço base e destino
-  function calcDistance(dest) {
-    return new Promise(resolve=>{
-      const service = new google.maps.DistanceMatrixService();
-      service.getDistanceMatrix({
-        origins: ['Av. Paranágua, 1296, São Paulo, SP'],
-        destinations: [dest],
-        unitSystem: google.maps.UnitSystem.METRIC,
-      }, (res) => {
-        const km = res.rows[0].elements[0].distance.value / 1000;
-        resolve(km);
+    function initMap() {
+      const map = new google.maps.Map(document.getElementById("map"), {
+        center: { lat: -23.5006, lng: -46.4536 },
+        zoom: 10,
       });
-    });
-  }
+      const marker = new google.maps.Marker({ position: map.getCenter(), map: map });
 
-  window.onload = init;
-</script>
-
+      const map2 = new google.maps.Map(document.getElementById("mapPreWedding"), {
+        center: { lat: -23.5006, lng: -46.4536 },
+        zoom: 10,
+      });
+      const marker2 = new google.maps.Marker({ position: map2.getCenter(), map: map2 });
+    }
+  </script>
 </body>
 </html>
