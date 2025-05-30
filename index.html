@@ -1,207 +1,201 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Orçamento Vinicius Barbaro Films</title>
-  <style>
-    :root {
-      --azul-primario: #0e3c61;
-      --azul-secundario: #467ca9;
-      --azul-destaque: #9fc5e8;
-    }
+// Orçamento Vinicius Barbaro Films
 
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f9fbfd;
-      color: #1a1a1a;
-      margin: 0;
-      padding: 0;
-    }
+import React, { useState, useEffect } from "react";
+import Papa from "papaparse";
+import { Button } from "@/components/ui/button";
 
-    header {
-      background-color: var(--azul-primario);
-      color: white;
-      padding: 2rem;
-      text-align: center;
-    }
+const SERVICE_URL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vSU-fqjBfA2H6XvQl7iQj04dVs3ZcpLBpfe1oDshpchCKwM5xA2YDnDo3aErtDjH0C3rq0FjxljUkjo/pub?output=csv";
+const MULTIPLIERS_URL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vTF9euiuflgr2u9eUDoI5WU11uL_d5IqOKbDc7VkidEifW_FdUId4T11Qg2gHwv4kodMfTqHqEwYGm3/pub?output=csv";
+const VIDEO_EDIT_TYPES_URL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRIYHSrb2-VHg1v-OnkmwKjBAkksm3x1JB2YUuJbl-UIMcNVOdRnqXsChw0koVOJCEDfufYQDLfVPPy/pub?output=csv";
+const VIDEO_ADDITIONALS_URL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vSBtaad2hZAfvpdIM3L12m9Pgq7hm_OCEC9AgxW6anYUuuPOPAQ1Cjfc89LtMmRQpHHapS3um71eeQU/pub?output=csv";
 
-    main {
-      max-width: 1000px;
-      margin: 2rem auto;
-      padding: 1rem;
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
+export default function Orcamento() {
+  const [services, setServices] = useState([]);
+  const [multipliers, setMultipliers] = useState({});
+  const [videoEditTypes, setVideoEditTypes] = useState([]);
+  const [videoAdditionals, setVideoAdditionals] = useState([]);
+  const [selectedServices, setSelectedServices] = useState({});
+  const [selectedVideoEdits, setSelectedVideoEdits] = useState([]);
+  const [selectedVideoAdditionals, setSelectedVideoAdditionals] = useState([]);
+  const [providerCount, setProviderCount] = useState(1);
+  const [isFilmingSelected, setIsFilmingSelected] = useState(false);
 
-    h1 {
-      font-size: 2rem;
-      margin-bottom: 1rem;
-    }
+  useEffect(() => {
+    Papa.parse(SERVICE_URL, {
+      download: true,
+      header: true,
+      complete: (results) => setServices(results.data),
+    });
 
-    .etapa {
-      display: none;
-    }
+    Papa.parse(MULTIPLIERS_URL, {
+      download: true,
+      header: true,
+      complete: (results) => {
+        const data = {};
+        results.data.forEach((row) => {
+          const key = row["Número de Fornecedores"];
+          data[key] = parseFloat(row["Multiplicador"]);
+        });
+        setMultipliers(data);
+      },
+    });
 
-    .ativa {
-      display: block;
-    }
+    Papa.parse(VIDEO_EDIT_TYPES_URL, {
+      download: true,
+      header: true,
+      complete: (results) => setVideoEditTypes(results.data),
+    });
 
-    .total {
-      position: sticky;
-      bottom: 0;
-      background: white;
-      padding: 1rem;
-      text-align: center;
-      border-top: 2px solid var(--azul-secundario);
-      font-size: 1.3rem;
-      font-weight: bold;
-    }
+    Papa.parse(VIDEO_ADDITIONALS_URL, {
+      download: true,
+      header: true,
+      complete: (results) => setVideoAdditionals(results.data),
+    });
+  }, []);
 
-    .botoes {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 2rem;
+  const handleServiceToggle = (serviceName) => {
+    const updated = { ...selectedServices };
+    if (updated[serviceName]) {
+      delete updated[serviceName];
+    } else {
+      updated[serviceName] = true;
     }
+    setSelectedServices(updated);
+    setIsFilmingSelected("Filmagem" in updated);
+  };
 
-    button {
-      background: var(--azul-secundario);
-      color: white;
-      border: none;
-      padding: 0.7rem 1.5rem;
-      font-size: 1rem;
-      border-radius: 6px;
-      cursor: pointer;
+  const handleVideoEditToggle = (type) => {
+    const updated = [...selectedVideoEdits];
+    const idx = updated.indexOf(type);
+    if (idx > -1) {
+      updated.splice(idx, 1);
+    } else {
+      updated.push(type);
     }
+    setSelectedVideoEdits(updated);
+  };
 
-    button:disabled {
-      background: #ccc;
-      cursor: not-allowed;
+  const handleVideoAdditionalToggle = (service) => {
+    const updated = [...selectedVideoAdditionals];
+    const idx = updated.indexOf(service);
+    if (idx > -1) {
+      updated.splice(idx, 1);
+    } else {
+      updated.push(service);
     }
+    setSelectedVideoAdditionals(updated);
+  };
 
-    .grupo {
-      margin-bottom: 2rem;
-    }
+  const calculateTotal = () => {
+    const multiplier = multipliers[providerCount] || 1;
+    let total = 0;
 
-    label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-weight: 600;
-    }
+    services.forEach((service) => {
+      if (selectedServices[service["Serviço"]]) {
+        const base = parseFloat(service["8h"] || 0); // Exemplo: usar 8h como base
+        total += base * multiplier;
+      }
+    });
 
-    select, input[type="number"] {
-      width: 100%;
-      padding: 0.5rem;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
+    videoEditTypes.forEach((type) => {
+      if (selectedVideoEdits.includes(type["Tipo de Vídeo"])) {
+        total += parseFloat(type["Valor"] || 0);
+      }
+    });
 
-    .checkbox-group {
-      display: flex;
-      flex-direction: column;
-    }
+    videoAdditionals.forEach((add) => {
+      if (selectedVideoAdditionals.includes(add["Serviço"])) {
+        total += parseFloat(add["Valor"] || 0);
+      }
+    });
 
-    .checkbox-group label {
-      font-weight: normal;
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>Orçamento Vinicius Barbaro Films</h1>
-    <p>Monte seu orçamento personalizado com estilo e transparência</p>
-  </header>
+    return total;
+  };
 
-  <main>
-    <form id="form-orcamento">
-      <!-- Etapas dinâmicas -->
-      <section id="etapa-1" class="etapa ativa">
-        <h2>1. Selecione os serviços do seu evento</h2>
-        <div id="servicos-container" class="grupo"></div>
-        <div id="submenu-video"></div>
-        <div class="botoes">
-          <span></span>
-          <button type="button" id="btn-proximo-1" disabled>Próximo</button>
+  return (
+    <div className="min-h-screen bg-[#F7F9FC] text-[#1A1A2E] p-6">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-4xl font-bold text-center text-[#1A237E] mb-6">
+          Orçamento Vinicius Barbaro Films
+        </h1>
+
+        <div className="space-y-4">
+          <h2 className="text-2xl font-semibold">Selecione os serviços:</h2>
+          {services.map((service, idx) => (
+            <div key={idx} className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={!!selectedServices[service["Serviço"]]}
+                onChange={() => handleServiceToggle(service["Serviço"])}
+              />
+              <label>{service["Serviço"]}</label>
+            </div>
+          ))}
         </div>
-      </section>
 
-      <section id="etapa-2" class="etapa">
-        <h2>2. Pré-Wedding</h2>
-        <div id="prewedding-container" class="grupo"></div>
-        <div class="botoes">
-          <button type="button" id="btn-voltar">Voltar</button>
-          <button type="button" id="btn-finalizar">Enviar pelo WhatsApp</button>
+        {isFilmingSelected && (
+          <div className="mt-6 space-y-4">
+            <h3 className="text-xl font-semibold">Tipos de Edição de Vídeo (obrigatório):</h3>
+            {videoEditTypes.map((type, idx) => (
+              <div key={idx} className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={selectedVideoEdits.includes(type["Tipo de Vídeo"])}
+                  onChange={() => handleVideoEditToggle(type["Tipo de Vídeo"])}
+                />
+                <label>
+                  {type["Tipo de Vídeo"]} - R$ {parseFloat(type["Valor"]).toFixed(2)}
+                </label>
+              </div>
+            ))}
+
+            <h3 className="text-xl font-semibold mt-4">Adicionais de Vídeo:</h3>
+            {videoAdditionals.map((add, idx) => (
+              <div key={idx} className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={selectedVideoAdditionals.includes(add["Serviço"])}
+                  onChange={() => handleVideoAdditionalToggle(add["Serviço"])}
+                />
+                <label>
+                  {add["Serviço"]} - R$ {parseFloat(add["Valor"]).toFixed(2)}
+                </label>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="mt-6 flex justify-between items-center border-t pt-4">
+          <label htmlFor="providers" className="font-semibold">
+            Quantidade de Fornecedores:
+          </label>
+          <input
+            id="providers"
+            type="number"
+            min="1"
+            max="10"
+            value={providerCount}
+            onChange={(e) => setProviderCount(e.target.value)}
+            className="border p-1 w-20"
+          />
         </div>
-      </section>
-    </form>
-  </main>
 
-  <div class="total">
-    Total: R$ <span id="valor-total">0,00</span>
-  </div>
+        <div className="mt-6 text-center">
+          <h2 className="text-3xl font-bold text-[#0D47A1]">
+            Total: R$ {calculateTotal().toFixed(2)}
+          </h2>
+        </div>
 
-  <script>
-    const servicosCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSU-fqjBfA2H6XvQl7iQj04dVs3ZcpLBpfe1oDshpchCKwM5xA2YDnDo3aErtDjH0C3rq0FjxljUkjo/pub?output=csv';
-    const multiplicadoresCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTF9euiuflgr2u9eUDoI5WU11uL_d5IqOKbDc7VkidEifW_FdUId4T11Qg2gHwv4kodMfTqHqEwYGm3/pub?output=csv';
-    const tiposVideoCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRIYHSrb2-VHg1v-OnkmwKjBAkksm3x1JB2YUuJbl-UIMcNVOdRnqXsChw0koVOJCEDfufYQDLfVPPy/pub?output=csv';
-    const adicionaisVideoCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSBtaad2hZAfvpdIM3L12m9Pgq7hm_OCEC9AgxW6anYUuuPOPAQ1Cjfc89LtMmRQpHHapS3um71eeQU/pub?output=csv';
-    const preweddingCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQDBuJTcMhHM9NbAwGBvbFHXv1sXzLIFXOL5IwiUynlb6DidR4x2HxnMmgRdFp1uGU4M2tPCkm3OcOk/pub?output=csv';
-
-    let valorTotal = 0;
-
-    function atualizarTotal(valor) {
-      valorTotal += valor;
-      document.getElementById('valor-total').textContent = valorTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-    }
-
-    async function carregarCSV(url) {
-      const res = await fetch(url);
-      const texto = await res.text();
-      const linhas = texto.trim().split('\n').map(l => l.split(','));
-      return linhas;
-    }
-
-    async function iniciar() {
-      const servicos = await carregarCSV(servicosCSV);
-      const multiplicadores = await carregarCSV(multiplicadoresCSV);
-      const tiposVideo = await carregarCSV(tiposVideoCSV);
-      const adicionaisVideo = await carregarCSV(adicionaisVideoCSV);
-      const prewedding = await carregarCSV(preweddingCSV);
-
-      montarEtapa1(servicos, multiplicadores, tiposVideo, adicionaisVideo);
-      montarEtapa2(prewedding);
-    }
-
-    function montarEtapa1(servicos, multiplicadores, tiposVideo, adicionaisVideo) {
-      const container = document.getElementById('servicos-container');
-      // Aqui você continua a renderização do passo 1 com os dados da planilha
-      // Inclua checkboxes para os serviços, menus para selecionar número de fornecedores e tempo de cobertura
-      // Mostre os valores corretamente
-      // Se "filmagem" for marcado, mostre os submenus de tipos de vídeo e adicionais
-    }
-
-    function montarEtapa2(prewedding) {
-      const container = document.getElementById('prewedding-container');
-      // Aqui você renderiza os serviços da etapa 2
-    }
-
-    document.getElementById('btn-voltar').addEventListener('click', () => {
-      document.getElementById('etapa-1').classList.add('ativa');
-      document.getElementById('etapa-2').classList.remove('ativa');
-    });
-
-    document.getElementById('btn-proximo-1').addEventListener('click', () => {
-      document.getElementById('etapa-1').classList.remove('ativa');
-      document.getElementById('etapa-2').classList.add('ativa');
-    });
-
-    document.getElementById('btn-finalizar').addEventListener('click', () => {
-      const mensagem = encodeURIComponent("Olá, Vinicius! Segue o meu orçamento gerado no site:\n\nTotal: R$ " + valorTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }));
-      window.open(`https://wa.me/5511978894210?text=${mensagem}`, '_blank');
-    });
-
-    iniciar();
-  </script>
-</body>
-</html>
+        <div className="mt-6 text-center">
+          <Button disabled={isFilmingSelected && selectedVideoEdits.length === 0}>
+            Próximo passo
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
