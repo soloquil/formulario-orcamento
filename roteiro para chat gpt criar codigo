@@ -1,0 +1,23 @@
+funcionalidades e roteiro do codigo:
+Passo um com seleção dos serviços
+https://docs.google.com/spreadsheets/d/e/2PACX-1vSU-fqjBfA2H6XvQl7iQj04dVs3ZcpLBpfe1oDshpchCKwM5xA2YDnDo3aErtDjH0C3rq0FjxljUkjo/pub?output=csv
+Nesta planilha temos os serviços e também os tempos de cobertura dos serviços e seus respectivos valor serviço por tempo de cobertura ao cruzar as linhas do serviço com a coluna dos tempos de cobertura.
+
+mostre os valores de acordo com o que for selcionado e usando os multiplicativos de valor de serviço desta planilha por numero de fornecedores:
+https://docs.google.com/spreadsheets/d/e/2PACX-1vTF9euiuflgr2u9eUDoI5WU11uL_d5IqOKbDc7VkidEifW_FdUId4T11Qg2gHwv4kodMfTqHqEwYGm3/pub?output=csv
+
+Caso o serviço de filmagem seja selecionado, iremos abrir dois submenos de seleção no primeiro passo.
+Sendo o primeiro dos tipos de video cujo qual deve ser selecionado ao menos um tipo de video (seus valores vão estar sendo mostrados a frente) e os tipos de video se encontram nesta planilha:
+https://docs.google.com/spreadsheets/d/e/2PACX-1vRIYHSrb2-VHg1v-OnkmwKjBAkksm3x1JB2YUuJbl-UIMcNVOdRnqXsChw0koVOJCEDfufYQDLfVPPy/pub?output=csv
+
+E o segundo submenu que ira aparecer ao selecionar que queremos filmagem é o de serviços adicionais de video:
+https://docs.google.com/spreadsheets/d/e/2PACX-1vSBtaad2hZAfvpdIM3L12m9Pgq7hm_OCEC9AgxW6anYUuuPOPAQ1Cjfc89LtMmRQpHHapS3um71eeQU/pub?output=csv
+Onde temos o serviço na primeira coluna e seu valor na segunda coluna.
+
+A segunda etapa possui os adicionais de pré wedding. que são definidos por tempo de cobertura também.
+https://docs.google.com/spreadsheets/d/e/2PACX-1vQDBuJTcMhHM9NbAwGBvbFHXv1sXzLIFXOL5IwiUynlb6DidR4x2HxnMmgRdFp1uGU4M2tPCkm3OcOk/pub?output=csv
+Aqui também selecionaremos o tempo (um unico tempo para ambos os serviços que são realiazados em conjunto), e a partir do tempo temos os valores para a seleção do tipo de serviço seja pré wedding de foto e/ou pré wedding de video e/ou outros serviços que possam haver nessa planilha de serviços de pré wedding.
+
+e no final teremos a soma de tudo que selecionamos de valores para mandar junto na mensagem. este retorno de valor ira nos acompanhar no final da pagina centralizado para que o cliente possa ver o valor aumentar ou diminuir conforme seleciona os itens.
+
+A segunda etapa possui a mensagem de whats app onde irei receber no meu numero 5511978894210 uma mensagem com todas essas informações.
