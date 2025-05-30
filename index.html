@@ -103,8 +103,33 @@
       input.onchange=()=>cb(input.value);
     }
 
-    // Calculation & enviarWhats as before
-    async function enviarWhats(){ /* ... */ }
+    async function enviarWhats(){
+      const nome = prompt("Digite seu nome completo:");
+      const telefone = prompt("Digite seu WhatsApp para contato:");
+      if (!nome || !telefone) return alert("Por favor, preencha todos os campos antes de continuar.");
+
+      // Coleta os dados selecionados
+      sel.services = [...document.querySelectorAll('#coverage-services input:checked')].map(i=>i.value);
+      sel.duration = document.getElementById('coverage-duration').value;
+      sel.startTime = document.getElementById('start-time').value;
+      sel.videoStyles = [...document.querySelectorAll('#video-styles input:checked')].map(i=>i.value);
+      sel.additional = [...document.querySelectorAll('#additional-services input:checked')].map(i=>i.value);
+      sel.pre = [...document.querySelectorAll('#prewedding-services input:checked')].map(i=>i.value);
+
+      // Monta a mensagem
+      const msg = `Olá, me chamo ${nome} e preenchi o formulário de orçamento:\n\n` +
+        `📍 Local do Evento: ${sel.address}\n`+
+        `🕓 Início: ${sel.startTime} | ⏳ Duração: ${sel.duration}\n`+
+        `🎥 Serviços do Dia: ${sel.services.join(', ') || 'Nenhum'}\n`+
+        `🎞 Estilos de Vídeo: ${sel.videoStyles.join(', ') || 'Nenhum'}\n`+
+        `➕ Adicionais: ${sel.additional.join(', ') || 'Nenhum'}\n`+
+        `💍 Pré-Wedding: ${sel.pre.join(', ') || 'Nenhum'}\n`+
+        `📍 Local do Pré-Wedding: ${sel.preAddress || 'Não informado'}\n`+
+        `📱 WhatsApp para contato: ${telefone}`;
+
+      const url = `https://wa.me/5511972790860?text=${encodeURIComponent(msg)}`;
+      window.open(url, '_blank');
+    }
 
     window.onload = loadSheet;
   </script>
