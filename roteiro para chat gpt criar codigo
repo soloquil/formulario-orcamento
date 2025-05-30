@@ -1,4 +1,6 @@
 funcionalidades e roteiro do codigo:
+Titulo: Orçamento Vinicius Barbaro Films
+cores de azul chique (pesquise cores elegantes de azul e faça uma pagina com look profissional para orçamento e de bela estetica que atenda a pscique de noivas).
 Passo um com seleção dos serviços
 https://docs.google.com/spreadsheets/d/e/2PACX-1vSU-fqjBfA2H6XvQl7iQj04dVs3ZcpLBpfe1oDshpchCKwM5xA2YDnDo3aErtDjH0C3rq0FjxljUkjo/pub?output=csv
 Nesta planilha temos os serviços e também os tempos de cobertura dos serviços e seus respectivos valor serviço por tempo de cobertura ao cruzar as linhas do serviço com a coluna dos tempos de cobertura.
@@ -6,18 +8,23 @@ Nesta planilha temos os serviços e também os tempos de cobertura dos serviços
 mostre os valores de acordo com o que for selcionado e usando os multiplicativos de valor de serviço desta planilha por numero de fornecedores:
 https://docs.google.com/spreadsheets/d/e/2PACX-1vTF9euiuflgr2u9eUDoI5WU11uL_d5IqOKbDc7VkidEifW_FdUId4T11Qg2gHwv4kodMfTqHqEwYGm3/pub?output=csv
 
-Caso o serviço de filmagem seja selecionado, iremos abrir dois submenos de seleção no primeiro passo.
-Sendo o primeiro dos tipos de video cujo qual deve ser selecionado ao menos um tipo de video (seus valores vão estar sendo mostrados a frente) e os tipos de video se encontram nesta planilha:
+Caso o serviço de filmagem seja selecionado, iremos abrir dois submenus de seleção no primeiro passo.
+Sendo o primeiro dos tipos de video cujo qual deve ser selecionado ao menos um tipo de video, se não for impeça o usuario de prosseguir para o passo 2, esta obrigação só exisitra se o usuario selecionar que quer serviço de filmagem e este submenu surgir (seus valores vão estar sendo mostrados a frente) e os tipos de video se encontram nesta planilha:
 https://docs.google.com/spreadsheets/d/e/2PACX-1vRIYHSrb2-VHg1v-OnkmwKjBAkksm3x1JB2YUuJbl-UIMcNVOdRnqXsChw0koVOJCEDfufYQDLfVPPy/pub?output=csv
+possivel selecionar varios tipos de video, some o valor deles ao valor final de retorno do usuario
 
 E o segundo submenu que ira aparecer ao selecionar que queremos filmagem é o de serviços adicionais de video:
 https://docs.google.com/spreadsheets/d/e/2PACX-1vSBtaad2hZAfvpdIM3L12m9Pgq7hm_OCEC9AgxW6anYUuuPOPAQ1Cjfc89LtMmRQpHHapS3um71eeQU/pub?output=csv
-Onde temos o serviço na primeira coluna e seu valor na segunda coluna.
+Onde temos o serviço na primeira coluna e seu valor na segunda coluna, mostre o valor para o cliente poder ver e se selecionado some no valor final
 
-A segunda etapa possui os adicionais de pré wedding. que são definidos por tempo de cobertura também.
+um botão de próximo que permite ir a segunda etapa onde oferecemos os serviços de pré wedding.
+
+A segunda etapa possui os adicionais de pré wedding. que são definidos por tempo de cobertura também assim como os serviços da etapa 1.
 https://docs.google.com/spreadsheets/d/e/2PACX-1vQDBuJTcMhHM9NbAwGBvbFHXv1sXzLIFXOL5IwiUynlb6DidR4x2HxnMmgRdFp1uGU4M2tPCkm3OcOk/pub?output=csv
 Aqui também selecionaremos o tempo (um unico tempo para ambos os serviços que são realiazados em conjunto), e a partir do tempo temos os valores para a seleção do tipo de serviço seja pré wedding de foto e/ou pré wedding de video e/ou outros serviços que possam haver nessa planilha de serviços de pré wedding.
 
-e no final teremos a soma de tudo que selecionamos de valores para mandar junto na mensagem. este retorno de valor ira nos acompanhar no final da pagina centralizado para que o cliente possa ver o valor aumentar ou diminuir conforme seleciona os itens.
-
 A segunda etapa possui a mensagem de whats app onde irei receber no meu numero 5511978894210 uma mensagem com todas essas informações.
+
+No final da pagina teremos a soma de tudo que selecionamos de valores para mandar junto na mensagem. este retorno de valor ira nos acompanhar no final da pagina centralizado para que o cliente possa ver o valor aumentar ou diminuir conforme seleciona os itens.
+Esta informação estará disponivel em todos os passos e se atualizara conforme formos selecionando os serviços.
+Tenha um botão de voltar caso queiramos voltar alguma etapa.
