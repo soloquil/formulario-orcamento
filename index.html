@@ -22,94 +22,74 @@
 </head>
 <body>
   <div class="container">
-    <h2>Orçamento Vinicius Barbaro Films</h2>
+    <h2>Orçamento Blur Records</h2>
     <h4>Monte seu pacote personalizado</h4>
-    <p style="text-align:center; font-size:0.9em; color:#888;">Atenção: os valores exibidos aqui são estimativas. O orçamento final pode variar conforme a data, distância e outros detalhes do evento.</p>
 
     <!-- Step 1: Serviços do Dia -->
-    <div id="step1" class="step active">
-      <h3>1. Serviços do Dia</h3>
+    <div class="checkbox-group">
+      <label><input type="checkbox" id="service-photo"> Fotografia <span class="price-tag" id="preco-foto"></span></label>
+      <label for="foto-fornecedores">Número de fotógrafos:</label>
+      <input type="number" id="foto-fornecedores" min="1" value="1">
 
-      <label for="tempoCobertura">Tempo de Cobertura:</label>
+      <label><input type="checkbox" id="service-video"> Filmagem <span class="price-tag" id="preco-video"></span></label>
+      <label for="video-fornecedores">Número de videomakers:</label>
+      <input type="number" id="video-fornecedores" min="1" value="1">
+
+      <label><input type="checkbox" id="service-story"> Storymaker</label>
+      <label for="story-fornecedores">Número de storytellers:</label>
+      <input type="number" id="story-fornecedores" min="1" value="1">
+    </div>
+
+    <div class="checkbox-group">
+      <label for="tempoCobertura">Tempo de cobertura:</label>
       <select id="tempoCobertura"></select>
-
-      <div class="checkbox-group">
-        <label><input type="checkbox" id="service-photo"> Fotografia <span class="price-tag" id="preco-foto"></span></label>
-        <label for="foto-fornecedores">Número de fotógrafos:</label>
-        <input type="number" id="foto-fornecedores" min="1" value="1">
-
-        <label><input type="checkbox" id="service-video"> Filmagem <span class="price-tag" id="preco-video"></span></label>
-        <label for="video-fornecedores">Número de videomakers:</label>
-        <input type="number" id="video-fornecedores" min="1" value="1">
-
-        <label><input type="checkbox" id="service-story"> Storymaker <span class="price-tag" id="preco-story"></span></label>
-        <label for="story-fornecedores">Número de storytellers (máximo 2):</label>
-        <input type="number" id="story-fornecedores" min="1" max="2" value="1">
-      </div>
-
-      <div id="video-options" class="checkbox-group" style="display:none;"></div>
-      <div id="video-additionals" class="checkbox-group" style="display:none;"></div>
-
-      <div class="nav">
-        <button id="next1" onclick="goStep(2)">Próximo</button>
-      </div>
     </div>
 
-    <!-- Step 2: Pré-Wedding -->
-    <div id="step2" class="step">
-      <h3>2. Pré-Wedding</h3>
-      <div class="checkbox-group">
-        <label><input type="checkbox" id="pre-photo" value="Pré-wedding foto"> Pré-wedding foto</label>
-        <label><input type="checkbox" id="pre-video" value="Pré-wedding vídeo"> Pré-wedding vídeo</label>
-      </div>
-      <div class="nav">
-        <button onclick="goStep(1)">Voltar</button>
-        <button id="sendBtn" onclick="sendWhats()">Enviar WhatsApp</button>
-      </div>
+    <div id="video-options" class="checkbox-group" style="display:none;"></div>
+    <div id="video-additionals" class="checkbox-group" style="display:none;"></div>
+
+    <div class="checkbox-group">
+      <label><input type="checkbox" id="pre-photo" checked disabled> Pré-wedding foto</label>
+      <label><input type="checkbox" id="pre-video" checked disabled> Pré-wedding vídeo</label>
     </div>
 
+    <div class="nav">
+      <button onclick="sendWhats()">Enviar pelo WhatsApp</button>
+    </div>
   </div>
 
   <script>
     let precosFotografia = {};
     let precosFilmagem = {};
     let tiposVideo = [];
-    let adicionaisVideo = [];
     let multiplicadores = {};
-    const precoStory = 400;
 
     async function carregarPlanilhas() {
       const resp1 = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vSU-fqjBfA2H6XvQl7iQj04dVs3ZcpLBpfe1oDshpchCKwM5xA2YDnDo3aErtDjH0C3rq0FjxljUkjo/pub?output=csv');
       const texto1 = await resp1.text();
-      const linhas1 = texto1.trim().split('\n').map(l => l.split(','));
-      const tempos = linhas1[0].slice(1);
-      tempos.forEach((t, i) => {
-        precosFotografia[t] = parseInt(linhas1[1][i+1]);
-        precosFilmagem[t] = parseInt(linhas1[2][i+1]);
+      const linhas = texto1.trim().split('\n').map(l => l.split(','));
+      linhas.slice(1).forEach(l => {
+        const tempo = l[0];
+        precosFotografia[tempo] = parseFloat(l[1]);
+        precosFilmagem[tempo] = parseFloat(l[2]);
       });
 
-      document.getElementById('tempoCobertura').innerHTML = tempos.map(t => `<option value="${t}">${t}</option>`).join('');
+      const select = document.getElementById('tempoCobertura');
+      select.innerHTML = linhas.slice(1).map(l => `<option value="${l[0]}">${l[0]}</option>`).join('');
 
-      const resp2 = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vSBtaad2hZAfvpdIM3L12m9Pgq7hm_OCEC9AgxW6anYUuuPOPAQ1Cjfc89LtMmRQpHHapS3um71eeQU/pub?output=csv');
+      const resp2 = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vSdDX0L9MmbgbM_BPbDRRQ0eRG2NQsb_hb4QFGGlQerKM2oB3UON1z04Ewb01R7CBXu-FU4OW6jcTx7/pub?output=csv');
       const texto2 = await resp2.text();
-      adicionaisVideo = texto2.trim().split('\n').map(l => l.split(','));
-      const videoAddDiv = document.getElementById('video-additionals');
-      videoAddDiv.innerHTML = adicionaisVideo.map(a =>
-        `<label><input type="checkbox" class="video-add" value="${a[0]}"> ${a[0]} <span class="price-tag">R$ ${a[1]}</span></label>`
+      const linhas2 = texto2.trim().split('\n').map(l => l.split(','));
+      tiposVideo = linhas2.slice(1);
+
+      document.getElementById('video-options').innerHTML = tiposVideo.map(v =>
+        `<label><input type="checkbox" class="video-type" value="${v[0]}"> ${v[0]} <span class="price-tag">R$ ${v[1]}</span></label>`
       ).join('');
 
       const resp3 = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vTF9euiuflgr2u9eUDoI5WU11uL_d5IqOKbDc7VkidEifW_FdUId4T11Qg2gHwv4kodMfTqHqEwYGm3/pub?output=csv');
       const texto3 = await resp3.text();
       const linhas3 = texto3.trim().split('\n').map(l => l.split(','));
       linhas3.slice(1).forEach(l => multiplicadores[l[1]] = parseFloat(l[2]));
-
-      const resp4 = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vRIYHSrb2-VHg1v-OnkmwKjBAkksm3x1JB2YUuJbl-UIMcNVOdRnqXsChw0koVOJCEDfufYQDLfVPPy/pub?output=csv');
-      const texto4 = await resp4.text();
-      tiposVideo = texto4.trim().split('\n').map(l => l.split(',')).slice(1);
-      const videoDiv = document.getElementById('video-options');
-      videoDiv.innerHTML = tiposVideo.map(v =>
-        `<label><input type="checkbox" class="video-type" value="${v[0]}"> ${v[0]} <span class="price-tag">R$ ${v[1]}</span></label>`
-      ).join('');
 
       atualizarPrecos();
       addEventListeners();
@@ -119,46 +99,25 @@
       const tempo = document.getElementById('tempoCobertura').value;
       const fotoQtd = document.getElementById('foto-fornecedores').value || 1;
       const videoQtd = document.getElementById('video-fornecedores').value || 1;
-      const storyQtd = Math.min(document.getElementById('story-fornecedores').value || 1, 2);
 
-      const multFoto = multiplicadores[fotoQtd] || 1;
-      const multVideo = multiplicadores[videoQtd] || 1;
+      const precoFoto = precosFotografia[tempo] * (multiplicadores[fotoQtd] || 1);
+      const precoVideo = precosFilmagem[tempo] * (multiplicadores[videoQtd] || 1);
 
-      document.getElementById('preco-foto').textContent = precosFotografia[tempo] ? `R$ ${Math.round(precosFotografia[tempo] * multFoto)}` : '';
-      document.getElementById('preco-video').textContent = precosFilmagem[tempo] ? `R$ ${Math.round(precosFilmagem[tempo] * multVideo)}` : '';
-      document.getElementById('preco-story').textContent = `R$ ${storyQtd * precoStory}`;
-    }
-
-    function goStep(n) {
-      document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-      document.getElementById('step'+n).classList.add('active');
+      document.getElementById('preco-foto').textContent = !isNaN(precoFoto) ? `R$ ${precoFoto.toFixed(2)}` : '';
+      document.getElementById('preco-video').textContent = !isNaN(precoVideo) ? `R$ ${precoVideo.toFixed(2)}` : '';
     }
 
     function toggleVideoSections() {
-      const videoChecked = document.getElementById('service-video').checked;
-      document.getElementById('video-options').style.display = videoChecked ? 'block' : 'none';
-      document.getElementById('video-additionals').style.display = videoChecked ? 'block' : 'none';
-      checkNext1();
-    }
-
-    function checkNext1() {
-      const videoChecked = document.getElementById('service-video').checked;
-      let enable = true;
-      if(videoChecked) {
-        const anyType = document.querySelectorAll('.video-type:checked').length > 0;
-        enable = anyType;
-      }
-      document.getElementById('next1').disabled = !enable;
+      const isChecked = document.getElementById('service-video').checked;
+      document.getElementById('video-options').style.display = isChecked ? 'block' : 'none';
+      document.getElementById('video-additionals').style.display = isChecked ? 'block' : 'none';
     }
 
     function addEventListeners() {
       document.getElementById('tempoCobertura').addEventListener('change', atualizarPrecos);
       document.getElementById('foto-fornecedores').addEventListener('input', atualizarPrecos);
       document.getElementById('video-fornecedores').addEventListener('input', atualizarPrecos);
-      document.getElementById('story-fornecedores').addEventListener('input', atualizarPrecos);
       document.getElementById('service-video').addEventListener('change', toggleVideoSections);
-      document.querySelectorAll('#service-photo, #service-story').forEach(el => el.addEventListener('change', checkNext1));
-      document.querySelectorAll('.video-type').forEach(el => el.addEventListener('change', checkNext1));
     }
 
     function sendWhats() {
@@ -167,22 +126,13 @@
       if(document.getElementById('service-video').checked) services.push('Filmagem');
       if(document.getElementById('service-story').checked) services.push('Storymaker');
 
-      const hasVideo = document.getElementById('service-video').checked;
       const videoTypes = Array.from(document.querySelectorAll('.video-type:checked')).map(i => i.value);
-      const additionals = Array.from(document.querySelectorAll('.video-add:checked')).map(i => i.value);
-      const pre = [];
-      if(document.getElementById('pre-photo').checked) pre.push('Pré-wedding foto');
-      if(document.getElementById('pre-video').checked) pre.push('Pré-wedding vídeo');
-
       const tempo = document.getElementById('tempoCobertura').value;
       let msg = 'Olá! gostaria de falar sobre este orçamento:';
       msg += `\nTempo de cobertura: ${tempo}`;
       msg += '\nServiços do dia: ' + (services.length ? services.join(', ') : 'Nenhum');
       if(videoTypes.length) msg += '\nTipos de Vídeo: ' + videoTypes.join(', ');
-      if(hasVideo && (videoTypes.length || additionals.length)) {
-        msg += '\nAdicionais de Vídeo: ' + (additionals.length ? additionals.join(', ') : 'Nenhum');
-      }
-      msg += '\nPré-Wedding: ' + (pre.length ? pre.join(', ') : 'Nenhum');
+      msg += '\nPré-Wedding: Pré-wedding foto, Pré-wedding vídeo';
 
       const url = 'https://wa.me/5511978894210?text=' + encodeURIComponent(msg);
       window.open(url, '_blank');
