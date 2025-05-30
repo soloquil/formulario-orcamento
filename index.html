@@ -44,12 +44,12 @@
       </div>
       <div id="video-additionals" class="checkbox-group" style="display:none;">
         <strong>Adicionais de Vídeo:</strong>
-        <label><input type="checkbox" value="drone ambientação"> drone ambientação</label>
-        <label><input type="checkbox" value="drone completo"> drone completo</label>
-        <label><input type="checkbox" value="sameday edit"> sameday edit</label>
+        <label><input type="checkbox" class="video-add" value="drone ambientação"> drone ambientação</label>
+        <label><input type="checkbox" class="video-add" value="drone completo"> drone completo</label>
+        <label><input type="checkbox" class="video-add" value="sameday edit"> sameday edit</label>
       </div>
       <div class="nav">
-        <button id="next1" onclick="goStep(2)" disabled>Próximo</button>
+        <button id="next1" onclick="goStep(2)">Próximo</button>
       </div>
     </div>
 
@@ -72,7 +72,6 @@
     function goStep(n) {
       document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
       document.getElementById('step'+n).classList.add('active');
-      if(n===1) checkNext1();
     }
 
     function toggleVideoSections() {
@@ -82,14 +81,13 @@
       checkNext1();
     }
 
-    // Event listeners
     document.getElementById('service-video').addEventListener('change', toggleVideoSections);
     document.querySelectorAll('#service-photo, #service-story').forEach(el => el.addEventListener('change', checkNext1));
     document.querySelectorAll('.video-type').forEach(el => el.addEventListener('change', checkNext1));
 
     function checkNext1() {
       const videoChecked = document.getElementById('service-video').checked;
-      let enable = true; // always enabled unless video requires type
+      let enable = true;
       if(videoChecked) {
         const anyType = document.querySelectorAll('.video-type:checked').length > 0;
         enable = anyType;
@@ -103,8 +101,9 @@
       if(document.getElementById('service-video').checked) services.push('Filmagem');
       if(document.getElementById('service-story').checked) services.push('Storymaker');
 
+      const hasVideo = document.getElementById('service-video').checked;
       const videoTypes = Array.from(document.querySelectorAll('.video-type:checked')).map(i => i.value);
-      const additionals = Array.from(document.querySelectorAll('#video-additionals input:checked')).map(i => i.value);
+      const additionals = Array.from(document.querySelectorAll('.video-add:checked')).map(i => i.value);
       const pre = [];
       if(document.getElementById('pre-photo').checked) pre.push('Pré-wedding foto');
       if(document.getElementById('pre-video').checked) pre.push('Pré-wedding vídeo');
@@ -112,14 +111,15 @@
       let msg = 'Olá! gostaria de falar sobre este orçamento:';
       msg += '\nServiços do dia: ' + (services.length ? services.join(', ') : 'Nenhum');
       if(videoTypes.length) msg += '\nTipos de Vídeo: ' + videoTypes.join(', ');
-      msg += '\nAdicionais de Vídeo: ' + (additionals.length ? additionals.join(', ') : 'Nenhum');
+      if(hasVideo && (videoTypes.length || additionals.length)) {
+        msg += '\nAdicionais de Vídeo: ' + (additionals.length ? additionals.join(', ') : 'Nenhum');
+      }
       msg += '\nPré-Wedding: ' + (pre.length ? pre.join(', ') : 'Nenhum');
 
       const url = 'https://wa.me/5511978894210?text=' + encodeURIComponent(msg);
       window.open(url, '_blank');
     }
 
-    // Initialize
     window.onload = () => {
       toggleVideoSections();
       checkNext1();
