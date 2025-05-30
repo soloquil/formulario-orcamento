@@ -1,140 +1,207 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Orçamento Vinicius Barbaro Films</title>
   <style>
-    body { font-family: 'Segoe UI', sans-serif; background: #f9f9f9; margin:0; padding:0; }
-    .container { max-width: 600px; margin: 2rem auto; background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    h2 { color: white; background-color: #0f3d57; padding: 1rem; border-radius: 8px; text-align: center; }
-    h4 { color: #555; margin-top: 0; margin-bottom: 1.5rem; text-align: center; }
-    .group { margin-bottom: 1rem; }
-    label { display: block; margin-bottom: 0.5rem; }
-    input[type="number"], select { width: 100%; padding: 0.5rem; border-radius: 6px; border: 1px solid #ccc; margin-bottom: 1rem; }
-    .price-tag { font-size: 0.9em; color: #555; margin-left: 0.5rem; }
-    .total { text-align: center; font-size: 1.2em; margin: 1rem 0; }
-    .nav { text-align: center; }
-    button { background: #0f3d57; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 6px; cursor: pointer; }
+    :root {
+      --azul-primario: #0e3c61;
+      --azul-secundario: #467ca9;
+      --azul-destaque: #9fc5e8;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f9fbfd;
+      color: #1a1a1a;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: var(--azul-primario);
+      color: white;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    main {
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .etapa {
+      display: none;
+    }
+
+    .ativa {
+      display: block;
+    }
+
+    .total {
+      position: sticky;
+      bottom: 0;
+      background: white;
+      padding: 1rem;
+      text-align: center;
+      border-top: 2px solid var(--azul-secundario);
+      font-size: 1.3rem;
+      font-weight: bold;
+    }
+
+    .botoes {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 2rem;
+    }
+
+    button {
+      background: var(--azul-secundario);
+      color: white;
+      border: none;
+      padding: 0.7rem 1.5rem;
+      font-size: 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .grupo {
+      margin-bottom: 2rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    select, input[type="number"] {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    .checkbox-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .checkbox-group label {
+      font-weight: normal;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Orçamento Vinicius Barbaro Films</h2>
-    <h4>Monte seu pacote personalizado</h4>
+  <header>
+    <h1>Orçamento Vinicius Barbaro Films</h1>
+    <p>Monte seu orçamento personalizado com estilo e transparência</p>
+  </header>
 
-    <!-- Serviços do Dia -->
-    <div class="group">
-      <label><input type="checkbox" id="service-photo"> Fotografia <span id="preco-foto" class="price-tag"></span></label>
-      <input type="number" id="photo-qty" min="1" max="7" value="1">
+  <main>
+    <form id="form-orcamento">
+      <!-- Etapas dinâmicas -->
+      <section id="etapa-1" class="etapa ativa">
+        <h2>1. Selecione os serviços do seu evento</h2>
+        <div id="servicos-container" class="grupo"></div>
+        <div id="submenu-video"></div>
+        <div class="botoes">
+          <span></span>
+          <button type="button" id="btn-proximo-1" disabled>Próximo</button>
+        </div>
+      </section>
 
-      <label><input type="checkbox" id="service-video"> Filmagem <span id="preco-video" class="price-tag"></span></label>
-      <input type="number" id="video-qty" min="1" max="7" value="1">
+      <section id="etapa-2" class="etapa">
+        <h2>2. Pré-Wedding</h2>
+        <div id="prewedding-container" class="grupo"></div>
+        <div class="botoes">
+          <button type="button" id="btn-voltar">Voltar</button>
+          <button type="button" id="btn-finalizar">Enviar pelo WhatsApp</button>
+        </div>
+      </section>
+    </form>
+  </main>
 
-      <label><input type="checkbox" id="service-story"> Storymaker <span id="preco-story" class="price-tag"></span></label>
-      <input type="number" id="story-qty" min="1" max="2" value="1">
-    </div>
-
-    <div class="group">
-      <label for="cover-time">Tempo de Cobertura:</label>
-      <select id="cover-time"></select>
-    </div>
-
-    <!-- Adicionais de Vídeo -->
-    <div id="addons" class="group"></div>
-
-    <div class="total" id="total-price">Total: R$ 0,00</div>
-
-    <div class="nav">
-      <button onclick="sendWhats()">Enviar pelo WhatsApp</button>
-    </div>
+  <div class="total">
+    Total: R$ <span id="valor-total">0,00</span>
   </div>
 
   <script>
-    let coverPrices = { photo: {}, video: {} };
-    let multipliers = {};
-    let addons = [];
-    const storyPrice = 400;
+    const servicosCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSU-fqjBfA2H6XvQl7iQj04dVs3ZcpLBpfe1oDshpchCKwM5xA2YDnDo3aErtDjH0C3rq0FjxljUkjo/pub?output=csv';
+    const multiplicadoresCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTF9euiuflgr2u9eUDoI5WU11uL_d5IqOKbDc7VkidEifW_FdUId4T11Qg2gHwv4kodMfTqHqEwYGm3/pub?output=csv';
+    const tiposVideoCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRIYHSrb2-VHg1v-OnkmwKjBAkksm3x1JB2YUuJbl-UIMcNVOdRnqXsChw0koVOJCEDfufYQDLfVPPy/pub?output=csv';
+    const adicionaisVideoCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSBtaad2hZAfvpdIM3L12m9Pgq7hm_OCEC9AgxW6anYUuuPOPAQ1Cjfc89LtMmRQpHHapS3um71eeQU/pub?output=csv';
+    const preweddingCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQDBuJTcMhHM9NbAwGBvbFHXv1sXzLIFXOL5IwiUynlb6DidR4x2HxnMmgRdFp1uGU4M2tPCkm3OcOk/pub?output=csv';
 
-    async function init() {
-      try {
-        const r1 = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vSU-fqjBfA2H6XvQl7iQj04dVs3ZcpLBpfe1oDshpchCKwM5xA2YDnDo3aErtDjH0C3rq0FjxljUkjo/pub?output=csv');
-        const t1 = await r1.text();
-        const lines1 = t1.trim().split('\n').map(l=>l.split(','));
-        const times = lines1[0].slice(1);
-        times.forEach((time,i)=>{
-          coverPrices.photo[time] = parseFloat(lines1[1][i+1]);
-          coverPrices.video[time] = parseFloat(lines1[2][i+1]);
-        });
-        document.getElementById('cover-time').innerHTML = times.map(t=>`<option>${t}</option>`).join('');
+    let valorTotal = 0;
 
-        const r2 = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vTF9euiuflgr2u9eUDoI5WU11uL_d5IqOKbDc7VkidEifW_FdUId4T11Qg2gHwv4kodMfTqHqEwYGm3/pub?output=csv');
-        const t2 = await r2.text();
-        t2.trim().split('\n').slice(1).forEach(l=>{
-          const [_,qty,m] = l.split(','); multipliers[qty] = parseFloat(m);
-        });
-
-        const r3 = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vSBtaad2hZAfvpdIM3L12m9Pgq7hm_OCEC9AgxW6anYUuuPOPAQ1Cjfc89LtMmRQpHHapS3um71eeQU/pub?output=csv');
-        const t3 = await r3.text();
-        addons = t3.trim().split('\n').slice(1).map(l=>{const [name,val]=l.split(',');return {name,val:parseFloat(val)}});
-        document.getElementById('addons').innerHTML = addons.map((a, i)=>
-          `<label><input type="checkbox" class="addon" value="${a.name}" data-index="${i}"> ${a.name} <span class="price-tag">R$ ${a.val.toFixed(2)}</span></label>`
-        ).join('');
-
-        addListeners(); updateTotal();
-      } catch (error) {
-        alert('Erro ao carregar dados. Verifique sua conexão e tente novamente.');
-        console.error('Erro na inicialização:', error);
-      }
+    function atualizarTotal(valor) {
+      valorTotal += valor;
+      document.getElementById('valor-total').textContent = valorTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     }
 
-    function getMultiplier(qty){ return multipliers[qty]||1; }
-
-    function updateTotal(){
-      const time = document.getElementById('cover-time').value;
-      let total=0;
-      if(document.getElementById('service-photo').checked){
-        const q=+document.getElementById('photo-qty').value;
-        total+= coverPrices.photo[time]*getMultiplier(q);
-      }
-      if(document.getElementById('service-video').checked){
-        const q=+document.getElementById('video-qty').value;
-        total+= coverPrices.video[time]*getMultiplier(q);
-      }
-      if(document.getElementById('service-story').checked){
-        const q=+document.getElementById('story-qty').value;
-        total+= storyPrice*q;
-      }
-      document.querySelectorAll('.addon:checked').forEach((el)=> {
-        const i = parseInt(el.getAttribute('data-index'));
-        if (!isNaN(i)) total += addons[i].val;
-      });
-      document.getElementById('total-price').textContent = `Total: R$ ${total.toFixed(2)}`;
+    async function carregarCSV(url) {
+      const res = await fetch(url);
+      const texto = await res.text();
+      const linhas = texto.trim().split('\n').map(l => l.split(','));
+      return linhas;
     }
 
-    function addListeners(){
-      ['service-photo','service-video','service-story','photo-qty','video-qty','story-qty','cover-time']
-      .forEach(id=>document.getElementById(id).addEventListener('change',updateTotal));
-      document.querySelectorAll('.addon').forEach(el=>el.addEventListener('change',updateTotal));
+    async function iniciar() {
+      const servicos = await carregarCSV(servicosCSV);
+      const multiplicadores = await carregarCSV(multiplicadoresCSV);
+      const tiposVideo = await carregarCSV(tiposVideoCSV);
+      const adicionaisVideo = await carregarCSV(adicionaisVideoCSV);
+      const prewedding = await carregarCSV(preweddingCSV);
+
+      montarEtapa1(servicos, multiplicadores, tiposVideo, adicionaisVideo);
+      montarEtapa2(prewedding);
     }
 
-    function sendWhats(){
-      const time=document.getElementById('cover-time').value;
-      const services=[];
-      if(document.getElementById('service-photo').checked) services.push(`Fotografia x${document.getElementById('photo-qty').value}`);
-      if(document.getElementById('service-video').checked) services.push(`Filmagem x${document.getElementById('video-qty').value}`);
-      if(document.getElementById('service-story').checked) services.push(`Storymaker x${document.getElementById('story-qty').value}`);
-      const adds=Array.from(document.querySelectorAll('.addon:checked')).map(a=>a.value);
-      const totalText = document.getElementById('total-price').textContent;
-      let msg=`Olá! Gostaria deste orçamento:`;
-      msg+=`\nTempo de cobertura: ${time}`;
-      msg+=`\nServiços: ${services.join(', ')||'Nenhum'}`;
-      if(adds.length) msg+=`\nAdicionais: ${adds.join(', ')}`;
-      msg+=`\n${totalText}`;
-      window.open('https://wa.me/5511978894210?text='+encodeURIComponent(msg),'_blank');
+    function montarEtapa1(servicos, multiplicadores, tiposVideo, adicionaisVideo) {
+      const container = document.getElementById('servicos-container');
+      // Aqui você continua a renderização do passo 1 com os dados da planilha
+      // Inclua checkboxes para os serviços, menus para selecionar número de fornecedores e tempo de cobertura
+      // Mostre os valores corretamente
+      // Se "filmagem" for marcado, mostre os submenus de tipos de vídeo e adicionais
     }
 
-    window.onload = init;
+    function montarEtapa2(prewedding) {
+      const container = document.getElementById('prewedding-container');
+      // Aqui você renderiza os serviços da etapa 2
+    }
+
+    document.getElementById('btn-voltar').addEventListener('click', () => {
+      document.getElementById('etapa-1').classList.add('ativa');
+      document.getElementById('etapa-2').classList.remove('ativa');
+    });
+
+    document.getElementById('btn-proximo-1').addEventListener('click', () => {
+      document.getElementById('etapa-1').classList.remove('ativa');
+      document.getElementById('etapa-2').classList.add('ativa');
+    });
+
+    document.getElementById('btn-finalizar').addEventListener('click', () => {
+      const mensagem = encodeURIComponent("Olá, Vinicius! Segue o meu orçamento gerado no site:\n\nTotal: R$ " + valorTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }));
+      window.open(`https://wa.me/5511978894210?text=${mensagem}`, '_blank');
+    });
+
+    iniciar();
   </script>
 </body>
 </html>
