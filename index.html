@@ -1,155 +1,284 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Orçamento Filmagem e Foto</title>
-<style>
-  body { font-family: Arial, sans-serif; max-width: 600px; margin: 20px auto; padding: 10px; }
-  label { display: block; margin-top: 10px; }
-  input, select { width: 100%; padding: 8px; margin-top: 4px; }
-  button { margin-top: 20px; padding: 10px; width: 100%; background: #007bff; color: white; border: none; cursor: pointer; font-size: 16px; }
-  button:hover { background: #0056b3; }
-  #resultado { margin-top: 20px; font-weight: bold; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Orçamento Completo</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/papaparse/5.4.1/papaparse.min.js"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDkUBDgCyX6btyclRv2Gw41PR111VVzlOQ&libraries=places"></script>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 700px; margin: 30px auto; padding: 0 15px; }
+    h2 { margin-top: 40px; }
+    .step { display: none; }
+    .step.active { display: block; }
+    .buttons { margin-top: 20px; }
+    button { padding: 10px 20px; margin: 0 5px; cursor: pointer; }
+    .map { width: 100%; height: 300px; margin-top: 10px; }
+    label { display: block; margin: 10px 0 5px; }
+    select, input[type=text] { width: 100%; padding: 8px; }
+    .checkbox-group label { display: inline-block; margin-right: 15px; }
+  </style>
 </head>
 <body>
 
-<h2>Solicite seu Orçamento</h2>
+  <h1>Formulário de Orçamento</h1>
 
-<form id="formOrcamento">
-  
-  <label for="endereco">Endereço do Evento:</label>
-  <input type="text" id="endereco" placeholder="Rua, número, cidade, estado" required />
-  
-  <label for="duracao">Duração da Cobertura:</label>
-  <select id="duracao" required>
-    <option value="">Selecione</option>
-    <option value="7">7 horas</option>
-    <option value="8">8 horas</option>
-    <option value="9">9 horas</option>
-  </select>
-  
-  <label>Serviços:</label>
-  <label><input type="checkbox" class="servico" value="filmagem" /> Filmagem</label>
-  <label><input type="checkbox" class="servico" value="fotografia" /> Fotografia</label>
-  <label><input type="checkbox" class="servico" value="drone" /> Drone</label>
-  
-  <div id="resultado">Total: R$ 0,00</div>
-  
-  <button type="button" id="btnWhats">Enviar Orçamento via WhatsApp</button>
-</form>
+  <!-- Passo 1 -->
+  <div id="step1" class="step active">
+    <h2>1. Seleção de Coberturas do Dia</h2>
+    <label for="duracao">Duração da Cobertura:</label>
+    <select id="duracao"></select>
+
+    <div id="fornecedores"></div>
+
+    <div class="buttons">
+      <button onclick="nextStep(2)">Próximo</button>
+    </div>
+  </div>
+
+  <!-- Passo 2 -->
+  <div id="step2" class="step">
+    <h2>2. Estilos de Vídeo Contratados</h2>
+    <div id="estilosVideo" class="checkbox-group"></div>
+    <div class="buttons">
+      <button onclick="prevStep(1)">Voltar</button>
+      <button onclick="nextStep(3)">Próximo</button>
+    </div>
+  </div>
+
+  <!-- Passo 3 -->
+  <div id="step3" class="step">
+    <h2>3. Serviços Adicionais de Vídeo</h2>
+    <div id="addVideo" class="checkbox-group"></div>
+    <div class="buttons">
+      <button onclick="prevStep(2)">Voltar</button>
+      <button onclick="nextStep(4)">Próximo</button>
+    </div>
+  </div>
+
+  <!-- Passo 4 -->
+  <div id="step4" class="step">
+    <h2>4. Local do Evento</h2>
+    <input id="inputLocal" type="text" placeholder="Busque o local..." />
+    <div id="mapLocal" class="map"></div>
+    <div class="buttons">
+      <button onclick="prevStep(3)">Voltar</button>
+      <button onclick="nextStep(5)">Próximo</button>
+    </div>
+  </div>
+
+  <!-- Passo 5 -->
+  <div id="step5" class="step">
+    <h2>5. Serviços de Pré-Wedding</h2>
+    <div id="preWedding" class="checkbox-group"></div>
+    <div class="buttons">
+      <button onclick="prevStep(4)">Voltar</button>
+      <button id="btnPreNext" onclick="handlePreWeddingNext()">Não quero pré-wedding</button>
+    </div>
+  </div>
+
+  <!-- Passo 6 -->
+  <div id="step6" class="step">
+    <h2>6. Local do Pré-Wedding</h2>
+    <input id="inputPreLocal" type="text" placeholder="Busque o local..." />
+    <div id="mapPreLocal" class="map"></div>
+    <div class="buttons">
+      <button onclick="prevStep(5)">Voltar</button>
+      <button onclick="nextStep(7)">Próximo</button>
+    </div>
+  </div>
+
+  <!-- Passo 7 -->
+  <div id="step7" class="step">
+    <h2>7. Revisão e Envio</h2>
+    <pre id="resumo"></pre>
+    <div class="buttons">
+      <button onclick="prevStep(preWeddingSelected ? 6 : 4)">Voltar</button>
+      <button onclick="enviarWhats()">Enviar Orçamento</button>
+    </div>
+  </div>
 
 <script>
-// Configurações de preços por serviço e duração (7h, 8h, 9h)
-const precos = {
-  filmagem: {7: 1500, 8: 1700, 9: 1900},
-  fotografia: {7: 1300, 8: 1500, 9: 1700},
-  drone: {7: 500, 8: 600, 9: 700}
-};
+  // URLs dos CSVs publicados
+  const URL_COBERTURAS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSU-fqjBfA2H6XvQl7iQj04dVs3ZcpLBpfe1oDshpchCKwM5xA2YDnDo3aErtDjH0C3rq0FjxljUkjo/pub?gid=0&single=true&output=csv';
+  const URL_MULTIPLICATIVO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSU-fqjBfA2H6XvQl7iQj04dVs3ZcpLBpfe1oDshpchCKwM5xA2YDnDo3aErtDjH0C3rq0FjxljUkjo/pub?gid=1&single=true&output=csv';
+  const URL_ESTILOS   = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSU-fqjBfA2H6XvQl7iQj04dVs3ZcpLBpfe1oDshpchCKwM5xA2YDnDo3aErtDjH0C3rq0FjxljUkjo/pub?gid=2&single=true&output=csv';
+  const URL_ADICIONAL  = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSU-fqjBfA2H6XvQl7iQj04dVs3ZcpLBpfe1oDshpchCKwM5xA2YDnDo3aErtDjH0C3rq0FjxljUkjo/pub?gid=3&single=true&output=csv';
+  const URL_PREWED     = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSU-fqjBfA2H6XvQl7iQj04dVs3ZcpLBpfe1oDshpchCKwM5xA2YDnDo3aErtDjH0C3rq0FjxljUkjo/pub?gid=4&single=true&output=csv';
+  const URL_DESLOC     = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSU-fqjBfA2H6XvQl7iQj04dVs3ZcpLBpfe1oDshpchCKwM5xA2YDnDo3aErtDjH0C3rq0FjxljUkjo/pub?gid=5&single=true&output=csv';
 
-// Endereço base para cálculo de distância (exemplo)
-const enderecoBase = "Av. Paulista, São Paulo, SP";
+  let coberturas = [], multiplicativo = [], estilos = [], adicional = [], prewed = [], desloc = [];
+  let duracaoSel, fornecedoresSel = {}, estilosSel = [], addVidSel = [], localEvt, preWeddingSelected = false, localPreEvt;
 
-// Valor por km acima de 40km
-const valorKmAdicional = 2; // R$ 2 por km excedente
-const kmIsento = 40;
+  // Carrega todas as abas
+  function loadSheet(url, callback) {
+    Papa.parse(url, { download: true, header: true, complete: res => callback(res.data) });
+  }
+  function init() {
+    loadSheet(URL_COBERTURAS, data=>{ coberturas = data; populaDuracao(); });
+    loadSheet(URL_MULTIPLICATIVO, data=> multiplicativo = data);
+    loadSheet(URL_ESTILOS, data=> populaCheckbox(data, 'estilosVideo'));
+    loadSheet(URL_ADICIONAL, data=> populaCheckbox(data, 'addVideo'));
+    loadSheet(URL_PREWED, data=> populaCheckbox(data, 'preWedding'));
+    loadSheet(URL_DESLOC, data=> desloc = data);
+    initMap('inputLocal', 'mapLocal', v=>localEvt=v);
+    initMap('inputPreLocal', 'mapPreLocal', v=>localPreEvt=v);
+  }
 
-// Função para calcular distância entre dois endereços via Google Maps Distance Matrix API
-// Para isso, você precisará inserir sua chave da API e ativar o serviço no Google Cloud
-const apiKey = "SUA_CHAVE_API_GOOGLE_MAPS_AQUI";
+  // Popula select duração
+  function populaDuracao() {
+    const sel = document.getElementById('duracao');
+    coberturas.forEach(r => {
+      sel.insertAdjacentHTML('beforeend',
+        `<option value="${r.Horas}">${r.Horas} ${r.Horas>1?'horas':'hora'}</option>`
+      );
+    });
+    sel.onchange = ()=> populaFornecedores();
+  }
 
-async function calcularDistancia(origem, destino) {
-  const url = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${encodeURIComponent(origem)}&destinations=${encodeURIComponent(destino)}&key=${apiKey}&units=metric&language=pt-BR`;
-  try {
-    const resposta = await fetch(url);
-    const dados = await resposta.json();
-    if(dados.status === "OK" && dados.rows[0].elements[0].status === "OK") {
-      return dados.rows[0].elements[0].distance.value / 1000; // distância em km
-    } else {
-      alert("Erro ao calcular distância. Verifique os endereços.");
-      return null;
+  // Popula número de fornecedores baseado em multiplicativo
+  function populaFornecedores() {
+    duracaoSel = document.getElementById('duracao').value;
+    const div = document.getElementById('fornecedores');
+    div.innerHTML = '';
+    ['filmagem','fotografia','storymaker'].forEach(tipo => {
+      const mult = multiplicativo.find(r=>r.Tipo===tipo && +r.Horas===+duracaoSel).Multiplicador;
+      const max = tipo==='storymaker'?2:Math.floor(mult);
+      div.insertAdjacentHTML('beforeend',
+        `<label>${tipo.charAt(0).toUpperCase()+tipo.slice(1)} (max ${max}): 
+           <input type="number" id="forn_${tipo}" min="0" max="${max}" value="0" />
+         </label>`
+      );
+    });
+  }
+
+  // Popula checklist genérica
+  function populaCheckbox(data, containerId) {
+    const div = document.getElementById(containerId);
+    data.forEach(r => {
+      div.insertAdjacentHTML('beforeend',
+        `<label><input type="checkbox" value="${r.Codigo}" /> ${r.Nome} (R$ ${r.Preco})</label>`
+      );
+    });
+  }
+
+  // Inicializa o mapa com Autocomplete e marker arrastável
+  function initMap(inputId, mapId, callback) {
+    const input = document.getElementById(inputId);
+    const mapDiv = document.getElementById(mapId);
+    const autocomplete = new google.maps.places.Autocomplete(input);
+    const map = new google.maps.Map(mapDiv, { center:{lat:-23.55052, lng:-46.633308}, zoom:13 });
+    const marker = new google.maps.Marker({ map, draggable:true });
+    autocomplete.bindTo('bounds', map);
+    autocomplete.addListener('place_changed', ()=>{
+      const place = autocomplete.getPlace();
+      if (!place.geometry) return;
+      map.panTo(place.geometry.location);
+      map.setZoom(15);
+      marker.setPosition(place.geometry.location);
+      callback(place.formatted_address);
+    });
+    marker.addListener('dragend', ()=>{
+      const pos = marker.getPosition();
+      new google.maps.Geocoder().geocode({ location: pos }, (results)=> {
+        if(results[0]) {
+          input.value = results[0].formatted_address;
+          callback(results[0].formatted_address);
+        }
+      });
+    });
+  }
+
+  // Navegação
+  function nextStep(n) {
+    document.querySelector('.step.active').classList.remove('active');
+    document.getElementById('step'+n).classList.add('active');
+  }
+  function prevStep(n) { nextStep(n); }
+
+  // Passo 5: Trata botão de pré-wed
+  function handlePreWeddingNext() {
+    preWeddingSelected = !![...document.querySelectorAll('#preWedding input:checked')].length;
+    document.getElementById('btnPreNext').textContent = preWeddingSelected ? 'Continuar' : 'Pular pré-wedding';
+    nextStep(preWeddingSelected?6:7);
+  }
+
+  // Cálculo final + WhatsApp
+  async function enviarWhats() {
+    // 1) Cobertura
+    const numFilmagem    = +document.getElementById('forn_filmagem').value;
+    const numFotografia  = +document.getElementById('forn_fotografia').value;
+    const numStorymaker  = +document.getElementById('forn_storymaker').value;
+    let total = 0;
+    // soma cada tipo
+    total += numFilmagem   * coberturas.find(r=>+r.Horas===+duracaoSel).PrecoFilmagem   * multiplicativo.find(r=>r.Tipo==='filmagem'  && +r.Horas===+duracaoSel).Multiplicador;
+    total += numFotografia * coberturas.find(r=>+r.Horas===+duracaoSel).PrecoFotografia * multiplicativo.find(r=>r.Tipo==='fotografia'&& +r.Horas===+duracaoSel).Multiplicador;
+    total += numStorymaker * coberturas.find(r=>+r.Horas===+duracaoSel).PrecoStory    * multiplicativo.find(r=>r.Tipo==='storymaker'&& +r.Horas===+duracaoSel).Multiplicador;
+
+    // 2) Estilos vídeo
+    [...document.querySelectorAll('#estilosVideo input:checked')].forEach(cb=>{
+      const reg = estilos.find(r=>r.Codigo===cb.value);
+      total += +reg.Preco;
+    });
+
+    // 3) Adicionais vídeo
+    [...document.querySelectorAll('#addVideo input:checked')].forEach(cb=>{
+      const reg = adicional.find(r=>r.Codigo===cb.value);
+      total += +reg.Preco;
+    });
+
+    // 4) Deslocamento evento
+    const distEvt = await calcDistance(localEvt);
+    const faixaEvt = desloc.find(d=>+d.Km>=Math.floor(distEvt));
+    total += +faixaEvt.Valor;
+
+    // 5) Pré-wedding
+    if (preWeddingSelected) {
+      const codPre = document.querySelector('#preWedding input:checked').value;
+      const regPre = prewed.find(r=>r.Codigo===codPre);
+      total += +regPre.Preco;
+      // deslocamento pré-wed
+      const distPre = await calcDistance(localPreEvt);
+      const faixaPre = desloc.find(d=>+d.Km>=Math.floor(distPre));
+      total += +faixaPre.Valor;
     }
-  } catch(e) {
-    alert("Erro na conexão com o Google Maps.");
-    return null;
-  }
-}
 
-const form = document.getElementById("formOrcamento");
-const resultado = document.getElementById("resultado");
-const btnWhats = document.getElementById("btnWhats");
+    // Resumo
+    let msg = `Olá! Gostaria de orçamento para:\nCobertura: ${duracaoSel}h\n` +
+      `Filmagem: x${numFilmagem}, Fotografia: x${numFotografia}, Storymaker: x${numStorymaker}\n` +
+      `Local evento: ${localEvt} (dist ${distEvt.toFixed(1)}km)\n`;
+    if (preWeddingSelected) {
+      msg += `Pré-wedding: ${prewed.find(r=>r.Codigo===codPre).Nome}\nLocal pré-wed: ${localPreEvt}\n`;
+    }
+    msg += `Total: R$ ${total.toFixed(2).replace('.',',')}`;
 
-let distanciaCalculada = null;
+    // Exibe no passo 7
+    document.getElementById('resumo').textContent = msg;
 
-async function calcularTotal() {
-  const duracao = form.duracao.value;
-  const enderecoEvento = form.endereco.value.trim();
-  const servicosSelecionados = [...form.querySelectorAll(".servico:checked")].map(el => el.value);
-
-  if (!duracao || servicosSelecionados.length === 0 || !enderecoEvento) {
-    resultado.textContent = "Total: R$ 0,00";
-    return;
-  }
-
-  // Calcular distância se ainda não calculada ou endereço mudou
-  if (!distanciaCalculada || form.endereco.value !== enderecoEvento) {
-    distanciaCalculada = await calcularDistancia(enderecoBase, enderecoEvento);
+    // Envia no Whats
+    window.open(
+      `https://api.whatsapp.com/send?phone=5511978894210&text=` +
+      encodeURIComponent(msg),
+      '_blank'
+    );
   }
 
-  if (distanciaCalculada === null) {
-    resultado.textContent = "Erro no cálculo da distância.";
-    return;
+  // Calcula distância entre endereço base e destino
+  function calcDistance(dest) {
+    return new Promise(resolve=>{
+      const service = new google.maps.DistanceMatrixService();
+      service.getDistanceMatrix({
+        origins: ['Av. Paranágua, 1296, São Paulo, SP'],
+        destinations: [dest],
+        unitSystem: google.maps.UnitSystem.METRIC,
+      }, (res) => {
+        const km = res.rows[0].elements[0].distance.value / 1000;
+        resolve(km);
+      });
+    });
   }
 
-  // Calcular valor adicional por distância
-  let adicionalDistancia = 0;
-  if (distanciaCalculada > kmIsento) {
-    adicionalDistancia = (distanciaCalculada - kmIsento) * valorKmAdicional;
-  }
-
-  // Calcular total dos serviços conforme duração
-  let total = 0;
-  servicosSelecionados.forEach(servico => {
-    total += precos[servico][duracao];
-  });
-
-  total += adicionalDistancia;
-
-  resultado.textContent = `Total: R$ ${total.toFixed(2).replace(".", ",")} (Distância: ${distanciaCalculada.toFixed(1)} km)`;
-  return total;
-}
-
-// Atualiza total ao mudar seleções
-form.addEventListener("change", () => {
-  distanciaCalculada = null; // força recalculo
-  calcularTotal();
-});
-
-btnWhats.addEventListener("click", async () => {
-  const duracao = form.duracao.value;
-  const enderecoEvento = form.endereco.value.trim();
-  const servicosSelecionados = [...form.querySelectorAll(".servico:checked")].map(el => el.value);
-
-  if (!duracao || servicosSelecionados.length === 0 || !enderecoEvento) {
-    alert("Por favor, preencha todos os campos e selecione ao menos um serviço.");
-    return;
-  }
-
-  const total = await calcularTotal();
-
-  if (total === null) return;
-
-  const servicosTexto = servicosSelecionados.map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(", ");
-
-  const mensagem = `Olá! Gostaria de um orçamento para:\n- Serviços: ${servicosTexto}\n- Duração: ${duracao} horas\n- Endereço do evento: ${enderecoEvento}\n- Distância calculada: ${distanciaCalculada.toFixed(1)} km\n- Valor total: R$ ${total.toFixed(2).replace(".", ",")}`;
-
-  const telefoneWhats = "55SEUNUMERODDD"; // Coloque seu número com DDD e sem espaços, ex: 5511999999999
-
-  const urlWhats = `https://api.whatsapp.com/send?phone=${telefoneWhats}&text=${encodeURIComponent(mensagem)}`;
-
-  window.open(urlWhats, "_blank");
-});
+  window.onload = init;
 </script>
 
 </body>
