@@ -15,6 +15,8 @@
     .nav { text-align: right; }
     button { background: #0f3d57; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; margin-left: 0.5rem; }
     button:disabled { background: #ccc; cursor: not-allowed; }
+    select { width: 100%; padding: 0.5rem; border-radius: 6px; border: 1px solid #ccc; margin-bottom: 1rem; }
+    .price-tag { color: #555; font-size: 0.9em; margin-left: 0.5em; }
   </style>
 </head>
 <body>
@@ -24,30 +26,41 @@
     <!-- Step 1: Serviços do Dia -->
     <div id="step1" class="step active">
       <h3>1. Serviços do Dia</h3>
+
+      <label for="tempoCobertura">Tempo de Cobertura:</label>
+      <select id="tempoCobertura">
+        <option value="8h">8h</option>
+        <option value="10h">10h</option>
+        <option value="12h">12h</option>
+      </select>
+
       <div class="checkbox-group">
-        <label><input type="checkbox" id="service-photo"> Fotografia</label>
-        <label><input type="checkbox" id="service-video"> Filmagem</label>
+        <label><input type="checkbox" id="service-photo"> Fotografia <span class="price-tag" id="preco-foto"></span></label>
+        <label><input type="checkbox" id="service-video"> Filmagem <span class="price-tag" id="preco-video"></span></label>
         <label><input type="checkbox" id="service-story"> Storymaker</label>
       </div>
+
       <div id="video-options" class="checkbox-group" style="display:none;">
         <strong>Tipos de Vídeo:</strong>
-        <label><input type="checkbox" class="video-type" value="video teaser - geral"> video teaser - geral</label>
-        <label><input type="checkbox" class="video-type" value="video teaser - balada"> video teaser - balada</label>
-        <label><input type="checkbox" class="video-type" value="video film (15m)"> video film (15m)</label>
-        <label><input type="checkbox" class="video-type" value="video cerimonial"> video cerimonial</label>
-        <label><input type="checkbox" class="video-type" value="video teaser - making off"> video teaser - making off</label>
-        <label><input type="checkbox" class="video-type" value="video teaser - cerimonial"> video teaser - cerimonial</label>
-        <label><input type="checkbox" class="video-type" value="video teaser - ensaio dos noivos"> video teaser - ensaio dos noivos</label>
-        <label><input type="checkbox" class="video-type" value="video short film (7m)"> video short film (7m)</label>
-        <label><input type="checkbox" class="video-type" value="video long film (30m)"> video long film (30m)</label>
-        <label><input type="checkbox" class="video-type" value="video extended film (50m)"> video extended film (50m)</label>
+        <label><input type="checkbox" class="video-type" value="video teaser - geral"> video teaser - geral <span class="price-tag">R$ 500</span></label>
+        <label><input type="checkbox" class="video-type" value="video teaser - balada"> video teaser - balada <span class="price-tag">R$ 500</span></label>
+        <label><input type="checkbox" class="video-type" value="video film (15m)"> video film (15m) <span class="price-tag">R$ 1200</span></label>
+        <label><input type="checkbox" class="video-type" value="video cerimonial"> video cerimonial <span class="price-tag">R$ 1000</span></label>
+        <label><input type="checkbox" class="video-type" value="video teaser - making off"> video teaser - making off <span class="price-tag">R$ 600</span></label>
+        <label><input type="checkbox" class="video-type" value="video teaser - cerimonial"> video teaser - cerimonial <span class="price-tag">R$ 600</span></label>
+        <label><input type="checkbox" class="video-type" value="video teaser - ensaio dos noivos"> video teaser - ensaio dos noivos <span class="price-tag">R$ 500</span></label>
+        <label><input type="checkbox" class="video-type" value="video short film (7m)"> video short film (7m) <span class="price-tag">R$ 900</span></label>
+        <label><input type="checkbox" class="video-type" value="video long film (30m)"> video long film (30m) <span class="price-tag">R$ 1500</span></label>
+        <label><input type="checkbox" class="video-type" value="video extended film (50m)"> video extended film (50m) <span class="price-tag">R$ 1800</span></label>
       </div>
+
       <div id="video-additionals" class="checkbox-group" style="display:none;">
         <strong>Adicionais de Vídeo:</strong>
         <label><input type="checkbox" class="video-add" value="drone ambientação"> drone ambientação</label>
         <label><input type="checkbox" class="video-add" value="drone completo"> drone completo</label>
         <label><input type="checkbox" class="video-add" value="sameday edit"> sameday edit</label>
       </div>
+
       <div class="nav">
         <button id="next1" onclick="goStep(2)">Próximo</button>
       </div>
@@ -69,6 +82,17 @@
   </div>
 
   <script>
+    const precosFotografia = { '8h': 3200, '10h': 3600, '12h': 3900 };
+    const precosFilmagem = { '8h': 3200, '10h': 3600, '12h': 3900 };
+
+    function atualizarPrecos() {
+      const tempo = document.getElementById('tempoCobertura').value;
+      document.getElementById('preco-foto').textContent = `R$ ${precosFotografia[tempo]}`;
+      document.getElementById('preco-video').textContent = `R$ ${precosFilmagem[tempo]}`;
+    }
+
+    document.getElementById('tempoCobertura').addEventListener('change', atualizarPrecos);
+
     function goStep(n) {
       document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
       document.getElementById('step'+n).classList.add('active');
@@ -108,7 +132,9 @@
       if(document.getElementById('pre-photo').checked) pre.push('Pré-wedding foto');
       if(document.getElementById('pre-video').checked) pre.push('Pré-wedding vídeo');
 
+      const tempo = document.getElementById('tempoCobertura').value;
       let msg = 'Olá! gostaria de falar sobre este orçamento:';
+      msg += `\nTempo de cobertura: ${tempo}`;
       msg += '\nServiços do dia: ' + (services.length ? services.join(', ') : 'Nenhum');
       if(videoTypes.length) msg += '\nTipos de Vídeo: ' + videoTypes.join(', ');
       if(hasVideo && (videoTypes.length || additionals.length)) {
@@ -123,6 +149,7 @@
     window.onload = () => {
       toggleVideoSections();
       checkNext1();
+      atualizarPrecos();
     };
   </script>
 </body>
