@@ -1,142 +1,116 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Orçamento Vinicius Barbaro Films</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orçamento Simplificado</title>
   <style>
-    body { margin:0; font-family:'Segoe UI',sans-serif; background:#fdfdfd url('https://www.transparenttextures.com/patterns/white-marble.png'); color:#2b2b2b; }
-    header { background:#0f3d57; color:#fff; padding:1rem; text-align:center; font-size:1.8rem; }
-    .step { display:none; max-width:700px; margin:2rem auto; background:#fff; padding:2rem; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.1);}   
-    .step.active { display:block; }
-    h2 { color:#0f3d57; margin-bottom:1rem; }
-    label { display:block; margin:0.5rem 0; font-weight:500; }
-    select,input[type="time"],input { width:48%; padding:0.5rem; margin:0.5rem 1%; border:1px solid #ccc; border-radius:6px; }
-    .checkbox-group label { display:inline-block; margin-right:1rem; }
-    button { background:#0f3d57; color:#fff; border:none; padding:0.8rem 1.5rem; border-radius:8px; cursor:pointer; transition:0.3s; margin:0.5rem; }
-    button:hover { background:#0d2e41; }
-    .nav-buttons { text-align:right; }
-    .footer { text-align:center; font-size:0.8rem; color:#888; margin:2rem 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f9f9f9; margin:0; padding:0; }
+    .container { max-width: 600px; margin: 2rem auto; background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    h2 { color: #0f3d57; margin-bottom: 1rem; }
+    .step { display: none; }
+    .step.active { display: block; }
+    .checkbox-group { margin-bottom: 1rem; }
+    .checkbox-group label { display: block; cursor: pointer; }
+    .nav { text-align: right; }
+    button { background: #0f3d57; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; margin-left: 0.5rem; }
+    button:disabled { background: #ccc; cursor: not-allowed; }
   </style>
-  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDkUBDgCyX6btyclRv2Gw41PR111VVzlOQ&libraries=places"></script>
 </head>
 <body>
-  <header>Vinicius Barbaro Films – Orçamento</header>
+  <div class="container">
+    <h2>Orçamento Rápido</h2>
+
+    <!-- Step 1 -->
+    <div id="step1" class="step active">
+      <h3>1. Serviços do Dia</h3>
+      <div class="checkbox-group">
+        <label><input type="checkbox" id="service-photo"> Fotografia</label>
+        <label><input type="checkbox" id="service-video"> Filmagem</label>
+        <label><input type="checkbox" id="service-story"> Storymaker</label>
+      </div>
+      <div id="video-options" class="checkbox-group" style="display:none;">
+        <strong>Tipos de Vídeo:</strong>
+        <label><input type="checkbox" value="video teaser - geral"> video teaser - geral</label>
+        <label><input type="checkbox" value="video teaser - balada"> video teaser - balada</label>
+        <label><input type="checkbox" value="video film (15m)"> video film (15m)</label>
+        <label><input type="checkbox" value="video cerimonial"> video cerimonial</label>
+        <label><input type="checkbox" value="video teaser - making off"> video teaser - making off</label>
+        <label><input type="checkbox" value="video teaser - cerimonial"> video teaser - cerimonial</label>
+        <label><input type="checkbox" value="video teaser - ensaio dos noivos"> video teaser - ensaio dos noivos</label>
+        <label><input type="checkbox" value="video short film (7m)"> video short film (7m)</label>
+        <label><input type="checkbox" value="video long film (30m)"> video long film (30m)</label>
+        <label><input type="checkbox" value="video extended film (50m)"> video extended film (50m)</label>
+      </div>
+      <div class="nav">
+        <button onclick="goStep(2)">Próximo</button>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div id="step2" class="step">
+      <h3>2. Adicionais de Vídeo</h3>
+      <div class="checkbox-group">
+        <label><input type="checkbox" value="drone ambientação"> drone ambientação</label>
+        <label><input type="checkbox" value="drone completo"> drone completo</label>
+        <label><input type="checkbox" value="sameday edit"> sameday edit</label>
+      </div>
+      <div class="nav">
+        <button onclick="goStep(1)">Voltar</button>
+        <button onclick="goStep(3)">Próximo</button>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div id="step3" class="step">
+      <h3>3. Pré-Wedding</h3>
+      <div class="checkbox-group">
+        <label><input type="checkbox" id="pre-photo" value="Pré-wedding foto"> Pré-wedding foto</label>
+        <label><input type="checkbox" id="pre-video" value="Pré-wedding vídeo"> Pré-wedding vídeo</label>
+      </div>
+      <div class="nav">
+        <button onclick="goStep(2)">Voltar</button>
+        <button onclick="sendWhats()">Enviar WhatsApp</button>
+      </div>
+    </div>
+
+  </div>
 
   <script>
-    let rows;
-    const sel={services:[],duration:'',start:'',video:[],additional:[],address:'',pre:[],preAddress:'',km:0};
-
-    async function load(){
-      const res=await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vSU-fqjBfA2H6XvQl7iQj04dVs3ZcpLBpfe1oDshpchCKwM5xA2YDnDo3aErtDjH0C3rq0FjxljUkjo/pub?output=csv');
-      rows=(await res.text()).split('\n').map(r=>r.split(','));
-      showStep(1);
-      initStep1();
-    }
-
-    function tag(t){return rows.findIndex(r=>r[0]===t);}    
-    function section(a,b){const i=tag(a),j=tag(b);return i>=0&&j>i?rows.slice(i+1,j):[];}    
-
-    function showStep(n){
-      document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+    function goStep(n) {
+      document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
       document.getElementById('step'+n).classList.add('active');
+      if(n===1) toggleVideo();
     }
 
-    function initStep1(){
-      // Serviços
-      const serv=section('serviço-de-cobertura-inicial','serviço-de-cobertura-final');
-      const divS=document.getElementById('services'); divS.innerHTML='';
-      serv.forEach(r=>{ if(r[0]) divS.insertAdjacentHTML('beforeend', `<label class="checkbox-group"><input type="checkbox" value="${r[0]}"> ${r[0]}</label>`); });
-      // Duração
-      const dur=section('duração-de-cobertura-inicial','duração-de-cobertura-final')[0]||[];
-      const selD=document.getElementById('dur'); selD.innerHTML='';
-      dur.forEach((v,i)=>{ if(i>0) selD.append(new Option(v,v)); });
-      document.getElementById('step1-btns').innerHTML=`<button onclick="collectStep1();showStep(2);initStep2()">Continuar</button>`;
-    }
-    function collectStep1(){
-      sel.services=[...document.querySelectorAll('#services input:checked')].map(i=>i.value);
-      sel.duration=document.getElementById('dur').value;
-      sel.start=document.getElementById('start').value;
+    function toggleVideo() {
+      const show = document.getElementById('service-video').checked;
+      document.getElementById('video-options').style.display = show ? 'block' : 'none';
     }
 
-    function initStep2(){
-      const vid=section('estilos-de-video-inicial','estilos-de-video-final');
-      const div=document.getElementById('video'); div.innerHTML='';
-      vid.forEach(r=>{ if(r[0]) div.insertAdjacentHTML('beforeend', `<label class="checkbox-group"><input type="checkbox" value="${r[0]}"> ${r[0]}</label>`); });
-      document.getElementById('step2-btns').innerHTML=`<button onclick="showStep(1);initStep1()">Voltar</button><button onclick="collectStep2();showStep(3);initStep3()">Continuar</button>`;
-    }
-    function collectStep2(){ sel.video=[...document.querySelectorAll('#video input:checked')].map(i=>i.value); }
+    document.getElementById('service-video').addEventListener('change', toggleVideo);
 
-    function initStep3(){
-      const add=section('adicionais-de-filmagem-inicial','adicionais-de-filmagem-final');
-      const div=document.getElementById('add'); div.innerHTML='';
-      add.forEach(r=>{ if(r[0]) div.insertAdjacentHTML('beforeend', `<label class="checkbox-group"><input type="checkbox" value="${r[0]}"> ${r[0]}</label>`); });
-      document.getElementById('step3-btns').innerHTML=`<button onclick="showStep(2);initStep2()">Voltar</button><button onclick="collectStep3();showStep(4);initStep4()">Continuar</button>`;
-    }
-    function collectStep3(){ sel.additional=[...document.querySelectorAll('#add input:checked')].map(i=>i.value); }
+    function sendWhats() {
+      const services = [];
+      if(document.getElementById('service-photo').checked) services.push('Fotografia');
+      if(document.getElementById('service-video').checked) services.push('Filmagem');
+      if(document.getElementById('service-story').checked) services.push('Storymaker');
 
-    function initStep4(){
-      document.getElementById('step4-btns').innerHTML=`<button onclick="showStep(3);initStep3()">Voltar</button><button onclick="showStep(5);initStep5()">Continuar</button>`;
-      ['map','map2'].forEach((id,i)=> initMap(id, addr=> i===0?sel.address=addr:sel.preAddress=addr));
-    }
+      const videoOpts = Array.from(document.querySelectorAll('#video-options input:checked')).map(i=>i.value);
+      const additionals = Array.from(document.querySelectorAll('#step2 input:checked')).map(i=>i.value);
+      const pre = [];
+      if(document.getElementById('pre-photo').checked) pre.push('Pré-wedding foto');
+      if(document.getElementById('pre-video').checked) pre.push('Pré-wedding vídeo');
 
-    function initStep5(){
-      const pre=section('serviços-de-pré-wedding-inicial','serviços-de-pré-wedding-final');
-      const div=document.getElementById('pre'); div.innerHTML='';
-      pre.forEach(r=>{ if(r[0]) div.insertAdjacentHTML('beforeend', `<label class="checkbox-group"><input type="checkbox" value="${r[0]}"> ${r[0]}</label>`); });
-      document.getElementById('step5-btns').innerHTML=`<button onclick="showStep(4);initStep4()">Voltar</button><button onclick="collectStep5();showStep(6);initStep6()">Continuar</button>`;
-    }
-    function collectStep5(){ sel.pre=[...document.querySelectorAll('#pre input:checked')].map(i=>i.value); }
+      let msg = 'Olá! gostaria de falar sobre este orçamento:';
+      msg += '\nServiços do dia: ' + (services.length? services.join(', ') : 'Nenhum');
+      if(videoOpts.length) msg += '\nTipos de Vídeo: ' + videoOpts.join(', ');
+      msg += '\nAdicionais: ' + (additionals.length? additionals.join(', ') : 'Nenhum');
+      msg += '\nPré-Wedding: ' + (pre.length? pre.join(', ') : 'Nenhum');
 
-    function initStep6(){
-      document.getElementById('step6-btns').innerHTML=`<button onclick="showStep(5);initStep5()">Voltar</button><button onclick="showStep(7);initStep7()">Continuar</button>`;
+      const url = 'https://wa.me/5511972790860?text=' + encodeURIComponent(msg);
+      window.open(url, '_blank');
     }
-
-    function initStep7(){
-      // prepare summary
-      const sum=document.getElementById('resumo');
-      sum.textContent=
-        `Local evento: ${sel.address}\n`+
-        `Serviços: ${sel.services.join(', ')}\n`+
-        `Duração: ${sel.duration} às ${sel.start}\n`+
-        `Estilos vídeo: ${sel.video.join(', ')}\n`+
-        `Adicionais: ${sel.additional.join(', ')}\n`+
-        `Pré-wedding: ${sel.pre.join(', ')}\n`+
-        `Local pré-wedding: ${sel.preAddress}`;
-      document.getElementById('step7-btns').innerHTML=`<button onclick="showStep(6);initStep6()">Voltar</button><button onclick="enviar()">Enviar WhatsApp</button>`;
-    }
-
-    function initMap(id,cb){
-      const inp=document.createElement('input'); inp.placeholder='Digite endereço'; inp.style='width:100%;padding:0.5rem;margin:0.5rem 0;';
-      document.getElementById(id).innerHTML=''; document.getElementById(id).appendChild(inp);
-      const auto=new google.maps.places.Autocomplete(inp);
-      auto.addListener('place_changed', ()=>cb(inp.value));
-    }
-
-    function enviar(){
-      const msg=`Olá! gostaria de falar sobre este orçamento:`+
-        `\nLocal evento: ${sel.address}`+
-        `\nServiços: ${sel.services.join(', ')}`+
-        `\nDuração/Início: ${sel.duration} às ${sel.start}`+
-        `\nEstilos vídeo: ${sel.video.join(', ')}`+
-        `\nAdicionais: ${sel.additional.join(', ')}`+
-        `\nPré-wedding: ${sel.pre.join(', ')}`+
-        `\nLocal pré-wedding: ${sel.preAddress}`;
-      window.open(`https://wa.me/5511972790860?text=${encodeURIComponent(msg)}`);
-    }
-
-    window.onload=load;
   </script>
-
-  <!-- Steps -->
-  <div id="step1" class="step"><h2>1. Serviços & Duração & Início</h2><div id="services"></div><label>Duração</label><select id="dur"></select><label>Início</label><input type="time" id="start"><div id="step1-btns" class="nav-buttons"></div></div>
-  <div id="step2" class="step"><h2>2. Estilos de Vídeo</h2><div id="video"></div><div id="step2-btns" class="nav-buttons"></div></div>
-  <div id="step3" class="step"><h2>3. Adicionais</h2><div id="add"></div><div id="step3-btns" class="nav-buttons"></div></div>
-  <div id="step4" class="step"><h2>4. Local do Evento</h2><div id="map" style="width:100%;height:200px;"></div><div id="step4-btns" class="nav-buttons"></div></div>
-  <div id="step5" class="step"><h2>5. Pré-Wedding</h2><div id="pre"></div><div id="step5-btns" class="nav-buttons"></div></div>
-  <div id="step6" class="step"><h2>6. Local Pré-Wedding</h2><div id="map2" style="width:100%;height:200px;"></div><div id="step6-btns" class="nav-buttons"></div></div>
-  <div id="step7" class="step"><h2>7. Resumo</h2><pre id="resumo"></pre><div id="step7-btns" class="nav-buttons"></div></div>
-
-  <div class="footer">© 2025 Vinicius Barbaro Films</div>
 </body>
 </html>
