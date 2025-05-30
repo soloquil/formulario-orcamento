@@ -134,14 +134,14 @@
       if(document.getElementById('extra-cabine').checked) extras.push('Cabine de fotos');
       if(document.getElementById('extra-instax').checked) extras.push('Instax ilimitada');
 
-      let msg = 'Olá! gostaria de falar sobre este orçamento:';
-      msg += '\nServiços do dia: ' + (services.length? services.join(', ') : 'Nenhum');
-      if(videoOpts.length) msg += '\nTipos de Vídeo: ' + videoOpts.join(', ');
-      msg += '\nAdicionais: ' + (additionals.length? additionals.join(', ') : 'Nenhum');
-      msg += '\nPré-Wedding: ' + (pre.length? pre.join(', ') : 'Nenhum');
-      msg += '\nExtras: ' + (extras.length? extras.join(', ') : 'Nenhum');
+      let msg = 'Olá! Gostaria de receber um orçamento para o meu casamento. Seguem as escolhas do formulário:';
+      msg += '\n\n📌 Serviços do dia: ' + (services.length? services.join(', ') : 'Nenhum');
+      if(videoOpts.length) msg += '\n🎬 Tipos de vídeo: ' + videoOpts.join(', ');
+      msg += '\n✨ Adicionais: ' + (additionals.length? additionals.join(', ') : 'Nenhum');
+      msg += '\n💍 Pré-Wedding: ' + (pre.length? pre.join(', ') : 'Nenhum');
+      msg += '\n🎁 Extras: ' + (extras.length? extras.join(', ') : 'Nenhum');
 
-      const url = 'https://wa.me/5511978894210?text=' + encodeURIComponent(msg);
+      const url = 'https://wa.me/5511972790860?text=' + encodeURIComponent(msg);
       window.open(url, '_blank');
     }
   </script>
