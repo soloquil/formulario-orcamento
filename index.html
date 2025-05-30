@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Orçamento Blur Records</title>
+  <title>Orçamento Vinicius Barbaro Films</title>
   <style>
     body { font-family: 'Segoe UI', sans-serif; background: #f9f9f9; margin:0; padding:0; }
     .container { max-width: 600px; margin: 2rem auto; background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    h2 { color: #0f3d57; margin-bottom: 0.2rem; }
-    h4 { color: #555; margin-top: 0; margin-bottom: 1.5rem; }
+    h2 { color: white; background-color: #0f3d57; padding: 1rem; border-radius: 8px; text-align: center; }
+    h4 { color: #555; margin-top: 0; margin-bottom: 1.5rem; text-align: center; }
     .step { display: none; }
     .step.active { display: block; }
     .checkbox-group { margin-bottom: 1rem; }
@@ -16,13 +16,13 @@
     .nav { text-align: right; }
     button { background: #0f3d57; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; margin-left: 0.5rem; }
     button:disabled { background: #ccc; cursor: not-allowed; }
-    select { width: 100%; padding: 0.5rem; border-radius: 6px; border: 1px solid #ccc; margin-bottom: 1rem; }
+    select, input[type="number"] { width: 100%; padding: 0.5rem; border-radius: 6px; border: 1px solid #ccc; margin-bottom: 1rem; }
     .price-tag { color: #555; font-size: 0.9em; margin-left: 0.5em; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>Orçamento Blur Records</h2>
+    <h2>Orçamento Vinicius Barbaro Films</h2>
     <h4>Monte seu pacote personalizado</h4>
 
     <!-- Step 1: Serviços do Dia -->
@@ -34,8 +34,16 @@
 
       <div class="checkbox-group">
         <label><input type="checkbox" id="service-photo"> Fotografia <span class="price-tag" id="preco-foto"></span></label>
+        <label for="foto-fornecedores">Número de fotógrafos:</label>
+        <input type="number" id="foto-fornecedores" min="1" value="1">
+
         <label><input type="checkbox" id="service-video"> Filmagem <span class="price-tag" id="preco-video"></span></label>
+        <label for="video-fornecedores">Número de videomakers:</label>
+        <input type="number" id="video-fornecedores" min="1" value="1">
+
         <label><input type="checkbox" id="service-story"> Storymaker</label>
+        <label for="story-fornecedores">Número de storytellers:</label>
+        <input type="number" id="story-fornecedores" min="1" value="1">
       </div>
 
       <div id="video-options" class="checkbox-group" style="display:none;">
@@ -73,6 +81,7 @@
     let precosFotografia = {};
     let precosFilmagem = {};
     let tiposVideo = [];
+    let multiplicadores = {};
 
     async function carregarPlanilhas() {
       const resp1 = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vSU-fqjBfA2H6XvQl7iQj04dVs3ZcpLBpfe1oDshpchCKwM5xA2YDnDo3aErtDjH0C3rq0FjxljUkjo/pub?output=csv');
@@ -99,14 +108,22 @@
         `<label><input type="checkbox" class="video-type" value="${v[0]}"> ${v[0]} <span class="price-tag">R$ ${v[1]}</span></label>`
       ).join('');
 
+      const resp3 = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vTF9euiuflgr2u9eUDoI5WU11uL_d5IqOKbDc7VkidEifW_FdUId4T11Qg2gHwv4kodMfTqHqEwYGm3/pub?output=csv');
+      const texto3 = await resp3.text();
+      const linhas3 = texto3.trim().split('\n').map(l => l.split(','));
+      linhas3.forEach(l => multiplicadores[l[1]] = parseFloat(l[2]));
+
       atualizarPrecos();
       addEventListeners();
     }
 
     function atualizarPrecos() {
       const tempo = document.getElementById('tempoCobertura').value;
-      document.getElementById('preco-foto').textContent = precosFotografia[tempo] ? `R$ ${precosFotografia[tempo]}` : '';
-      document.getElementById('preco-video').textContent = precosFilmagem[tempo] ? `R$ ${precosFilmagem[tempo]}` : '';
+      const fotoQtd = document.getElementById('foto-fornecedores').value || 1;
+      const videoQtd = document.getElementById('video-fornecedores').value || 1;
+
+      document.getElementById('preco-foto').textContent = precosFotografia[tempo] ? `R$ ${precosFotografia[tempo] * (multiplicadores[fotoQtd] || 1)}` : '';
+      document.getElementById('preco-video').textContent = precosFilmagem[tempo] ? `R$ ${precosFilmagem[tempo] * (multiplicadores[videoQtd] || 1)}` : '';
     }
 
     function goStep(n) {
@@ -133,6 +150,8 @@
 
     function addEventListeners() {
       document.getElementById('tempoCobertura').addEventListener('change', atualizarPrecos);
+      document.getElementById('foto-fornecedores').addEventListener('input', atualizarPrecos);
+      document.getElementById('video-fornecedores').addEventListener('input', atualizarPrecos);
       document.getElementById('service-video').addEventListener('change', toggleVideoSections);
       document.querySelectorAll('#service-photo, #service-story').forEach(el => el.addEventListener('change', checkNext1));
       document.querySelectorAll('.video-type').forEach(el => el.addEventListener('change', checkNext1));
