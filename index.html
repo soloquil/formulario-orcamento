@@ -1,15 +1,14 @@
-//Esta versão possui valores de foto e video mas não dos demais itens e nem do storymaker
+//First estable version (no values)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Orçamento Blur Records</title>
+  <title>Orçamento Simplificado</title>
   <style>
     body { font-family: 'Segoe UI', sans-serif; background: #f9f9f9; margin:0; padding:0; }
     .container { max-width: 600px; margin: 2rem auto; background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    h2 { color: #0f3d57; margin-bottom: 0.2rem; }
-    h4 { color: #555; margin-top: 0; margin-bottom: 1.5rem; }
+    h2 { color: #0f3d57; margin-bottom: 1rem; }
     .step { display: none; }
     .step.active { display: block; }
     .checkbox-group { margin-bottom: 1rem; }
@@ -17,39 +16,39 @@
     .nav { text-align: right; }
     button { background: #0f3d57; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; margin-left: 0.5rem; }
     button:disabled { background: #ccc; cursor: not-allowed; }
-    select { width: 100%; padding: 0.5rem; border-radius: 6px; border: 1px solid #ccc; margin-bottom: 1rem; }
-    .price-tag { color: #555; font-size: 0.9em; margin-left: 0.5em; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>Orçamento Blur Records</h2>
-    <h4>Monte seu pacote personalizado</h4>
+    <h2>Orçamento Rápido</h2>
 
     <!-- Step 1: Serviços do Dia -->
     <div id="step1" class="step active">
       <h3>1. Serviços do Dia</h3>
-
-      <label for="tempoCobertura">Tempo de Cobertura:</label>
-      <select id="tempoCobertura"></select>
-
       <div class="checkbox-group">
-        <label><input type="checkbox" id="service-photo"> Fotografia <span class="price-tag" id="preco-foto"></span></label>
-        <label><input type="checkbox" id="service-video"> Filmagem <span class="price-tag" id="preco-video"></span></label>
+        <label><input type="checkbox" id="service-photo"> Fotografia</label>
+        <label><input type="checkbox" id="service-video"> Filmagem</label>
         <label><input type="checkbox" id="service-story"> Storymaker</label>
       </div>
-
       <div id="video-options" class="checkbox-group" style="display:none;">
         <strong>Tipos de Vídeo:</strong>
+        <label><input type="checkbox" class="video-type" value="video teaser - geral"> video teaser - geral</label>
+        <label><input type="checkbox" class="video-type" value="video teaser - balada"> video teaser - balada</label>
+        <label><input type="checkbox" class="video-type" value="video film (15m)"> video film (15m)</label>
+        <label><input type="checkbox" class="video-type" value="video cerimonial"> video cerimonial</label>
+        <label><input type="checkbox" class="video-type" value="video teaser - making off"> video teaser - making off</label>
+        <label><input type="checkbox" class="video-type" value="video teaser - cerimonial"> video teaser - cerimonial</label>
+        <label><input type="checkbox" class="video-type" value="video teaser - ensaio dos noivos"> video teaser - ensaio dos noivos</label>
+        <label><input type="checkbox" class="video-type" value="video short film (7m)"> video short film (7m)</label>
+        <label><input type="checkbox" class="video-type" value="video long film (30m)"> video long film (30m)</label>
+        <label><input type="checkbox" class="video-type" value="video extended film (50m)"> video extended film (50m)</label>
       </div>
-
       <div id="video-additionals" class="checkbox-group" style="display:none;">
         <strong>Adicionais de Vídeo:</strong>
         <label><input type="checkbox" class="video-add" value="drone ambientação"> drone ambientação</label>
         <label><input type="checkbox" class="video-add" value="drone completo"> drone completo</label>
         <label><input type="checkbox" class="video-add" value="sameday edit"> sameday edit</label>
       </div>
-
       <div class="nav">
         <button id="next1" onclick="goStep(2)">Próximo</button>
       </div>
@@ -71,45 +70,6 @@
   </div>
 
   <script>
-    let precosFotografia = {};
-    let precosFilmagem = {};
-    let tiposVideo = [];
-
-    async function carregarPlanilhas() {
-      const resp1 = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vSU-fqjBfA2H6XvQl7iQj04dVs3ZcpLBpfe1oDshpchCKwM5xA2YDnDo3aErtDjH0C3rq0FjxljUkjo/pub?output=csv');
-      const texto1 = await resp1.text();
-      const linhas1 = texto1.trim().split('\n').map(l => l.split(','));
-      const tempos = linhas1[0].slice(1);
-      precosFotografia = {};
-      precosFilmagem = {};
-      tempos.forEach((t, i) => {
-        precosFotografia[t] = parseInt(linhas1[1][i+1]);
-        precosFilmagem[t] = parseInt(linhas1[2][i+1]);
-      });
-
-      const select = document.getElementById('tempoCobertura');
-      select.innerHTML = tempos.map(t => `<option value="${t}">${t}</option>`).join('');
-
-      const resp2 = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vRIYHSrb2-VHg1v-OnkmwKjBAkksm3x1JB2YUuJbl-UIMcNVOdRnqXsChw0koVOJCEDfufYQDLfVPPy/pub?output=csv');
-      const texto2 = await resp2.text();
-      const linhas2 = texto2.trim().split('\n').map(l => l.split(','));
-      tiposVideo = linhas2.slice(1);
-
-      const videoDiv = document.getElementById('video-options');
-      videoDiv.innerHTML = '<strong>Tipos de Vídeo:</strong>' + tiposVideo.map(v =>
-        `<label><input type="checkbox" class="video-type" value="${v[0]}"> ${v[0]} <span class="price-tag">R$ ${v[1]}</span></label>`
-      ).join('');
-
-      atualizarPrecos();
-      addEventListeners();
-    }
-
-    function atualizarPrecos() {
-      const tempo = document.getElementById('tempoCobertura').value;
-      document.getElementById('preco-foto').textContent = precosFotografia[tempo] ? `R$ ${precosFotografia[tempo]}` : '';
-      document.getElementById('preco-video').textContent = precosFilmagem[tempo] ? `R$ ${precosFilmagem[tempo]}` : '';
-    }
-
     function goStep(n) {
       document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
       document.getElementById('step'+n).classList.add('active');
@@ -122,6 +82,10 @@
       checkNext1();
     }
 
+    document.getElementById('service-video').addEventListener('change', toggleVideoSections);
+    document.querySelectorAll('#service-photo, #service-story').forEach(el => el.addEventListener('change', checkNext1));
+    document.querySelectorAll('.video-type').forEach(el => el.addEventListener('change', checkNext1));
+
     function checkNext1() {
       const videoChecked = document.getElementById('service-video').checked;
       let enable = true;
@@ -130,13 +94,6 @@
         enable = anyType;
       }
       document.getElementById('next1').disabled = !enable;
-    }
-
-    function addEventListeners() {
-      document.getElementById('tempoCobertura').addEventListener('change', atualizarPrecos);
-      document.getElementById('service-video').addEventListener('change', toggleVideoSections);
-      document.querySelectorAll('#service-photo, #service-story').forEach(el => el.addEventListener('change', checkNext1));
-      document.querySelectorAll('.video-type').forEach(el => el.addEventListener('change', checkNext1));
     }
 
     function sendWhats() {
@@ -152,9 +109,7 @@
       if(document.getElementById('pre-photo').checked) pre.push('Pré-wedding foto');
       if(document.getElementById('pre-video').checked) pre.push('Pré-wedding vídeo');
 
-      const tempo = document.getElementById('tempoCobertura').value;
       let msg = 'Olá! gostaria de falar sobre este orçamento:';
-      msg += `\nTempo de cobertura: ${tempo}`;
       msg += '\nServiços do dia: ' + (services.length ? services.join(', ') : 'Nenhum');
       if(videoTypes.length) msg += '\nTipos de Vídeo: ' + videoTypes.join(', ');
       if(hasVideo && (videoTypes.length || additionals.length)) {
@@ -166,7 +121,10 @@
       window.open(url, '_blank');
     }
 
-    window.onload = carregarPlanilhas;
+    window.onload = () => {
+      toggleVideoSections();
+      checkNext1();
+    };
   </script>
 </body>
 </html>
